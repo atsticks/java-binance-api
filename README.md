@@ -14,21 +14,21 @@ https://github.com/shufps/java-binance-api
 Add the following Maven dependency to your project's `pom.xml`:
 ```
 <dependency>
-  <groupId>com.webcerebrium</groupId>
+  <groupId>gh.atsticks</groupId>
   <artifactId>binance-api</artifactId>
-  <version>1.0.9</version>
+  <version>1.0.10-SNAPSHOT</version>
 </dependency>
 ```
 
 #### with Gradle
 ```
-compile group: 'com.webcerebrium', name: 'binance-api', version: '1.0.9'
+compile group: 'gh.atsticks', name: 'binance-api', version: '1.0.10-SNAPSHOT'
 ```
 
 #### with Grapes
 ```
 @Grapes([ 
-@Grab(group = 'com.webcerebrium', module = 'binance-api', version = '1.0.9')
+@Grab(group = 'gh.atsticks', module = 'binance-api', version = '1.0.10-SNAPSHOT')
 ])
 ```
 
@@ -38,7 +38,7 @@ After `git clone`, please run `gradle jar`, which will result in having jar unde
 compilation you will have jar in your folder, which could be included as your dependency like this:
 ```
 dependencies {
-    compile files('libs/binance-api-1.0.9.jar')
+    compile files('libs/binance-api-1.0.10-SNAPSHOT.jar')
 }
 ```
 
@@ -49,7 +49,7 @@ import com.webcerebrium.binance.api.BinanceApiException;
 
 try {
   BinanceApi api = new BinanceApi();
-  System.out.println("ETH-BTC PRICE=" + api.pricesMap().get("ETHBTC"));
+  System.out.println("ETH-BTC PRICE=" + api.getPrice("ETHBTC"));
 } catch (BinanceApiException e) {
   System.out.println( "ERROR: " + e.getMessage());
 }
@@ -88,13 +88,13 @@ To start, import current directory as Gradle project.
 
 #### Checking Server Responsiveness
 ```java
-System.out.println((new BinanceApi()).ping() );
+System.out.println(new BinanceApi().ping());
 ```
 <details><summary>View Output</summary><pre>{}</pre></details>
 
 #### Getting Server Time
 ```java
-System.out.println((new BinanceApi()).time().get("serverTime").getAsString());
+System.out.println(new BinanceApi().getServerTime());
 ```
 <details><summary>View Output</summary><pre>1508364584572</pre></details>
 
@@ -103,14 +103,14 @@ System.out.println((new BinanceApi()).time().get("serverTime").getAsString());
 #### Getting Account Information
 
 ```java
-JsonObject account = (new BinanceApi()).account();
-System.out.println("Maker Commission: " + account.get("makerCommission").getAsBigDecimal());
-System.out.println("Taker Commission: " + account.get("takerCommission").getAsBigDecimal());
-System.out.println("Buyer Commission: " + account.get("buyerCommission").getAsBigDecimal());
-System.out.println("Seller Commission: " + account.get("sellerCommission").getAsBigDecimal());
-System.out.println("Can Trade: " +  account.get("canTrade").getAsBoolean());
-System.out.println("Can Withdraw: " + account.get("canWithdraw").getAsBoolean());
-System.out.println("Can Deposit: " + account.get("canDeposit").getAsBoolean());
+BinanceAccount account = new BinanceApi().account();
+System.out.println("Maker Commission: " + account.getMakerCommission());
+System.out.println("Taker Commission: " + account.getTakerCommission());
+System.out.println("Buyer Commission: " + account.getBuyerCommission());
+System.out.println("Seller Commission: " + account.getSellerCommission());
+System.out.println("Can Trade: " +  account.isCanTrade());
+System.out.println("Can Withdraw: " + account.isCanWithdraw());
+System.out.println("Can Deposit: " + account.isCanDeposit());
 ```
 <details><summary>View Output</summary>
 <pre>
@@ -127,7 +127,8 @@ Can Deposit: true
 #### Getting All Balances
 
 ```java
-System.out.println((new BinanceApi()).balances());
+BinanceAccount account = ...;
+System.out.println(account.getAssets());
 ```
 <details><summary>View Output</summary>
 <pre>[{"asset":"BTC","free":"0.00001161","locked":"0.00000000"},{"asset":"LTC","free":"0.00000000","locked":"0.00000000"},...,{"asset":"ZEC","free":"0.00000000","locked":"0.00000000"}]</pre>
@@ -135,7 +136,8 @@ System.out.println((new BinanceApi()).balances());
 
 #### Getting Asset Balance
 ```java
-System.out.println((new BinanceApi()).balancesMap().get("ETH"));
+BinanceAccount account = ...;
+System.out.println(account.getAsset("ETH"));
 ```
 <details><summary>View Output</summary>
 <pre>BinanceWalletAsset(asset=ETH, free=0.00859005, locked=0E-8)</pre>
@@ -143,7 +145,7 @@ System.out.println((new BinanceApi()).balancesMap().get("ETH"));
 
 #### Getting Open Orders
 ```java
-System.out.println((new BinanceApi()).openOrders(BinanceSymbol.valueOf("ETHBTC")));
+System.out.println(new BinanceApi().getOpenOrders(BinanceSymbol.valueOf("ETHBTC")));
 ```
 <details><summary>View Output</summary>
 <pre>[BinanceOrder(symbol=ETHBTC, orderId=11111, clientOrderId=hNch6HItMQp2m9VuQZaA6L, price=0.18200000, origQty=1.00000000, executedQty=0E-8, status=NEW, timeInForce=GTC, type=LIMIT, side=SELL, stopPrice=0E-8, icebergQty=0E-8, time=1508361363677)]</pre>
@@ -162,7 +164,7 @@ System.out.println(api.getOrderByOrigClientId(symbol, "2m9VuQZaA6LhNch6HItMQp"))
 
 #### Getting All Orders
 ```java
-System.out.println((new BinanceApi()).allOrders(BinanceSymbol.valueOf("BQXBTC")));
+System.out.println(new BinanceApi().getAllOrders(BinanceSymbol.valueOf("BQXBTC")));
 ```
 <details><summary>View Output</summary>
 <pre>[BinanceOrder(symbol=BQXBTC, orderId=11111, clientOrderId=D0qeCsEBxKaXSRwxKUZkBZ, price=0.00018602, origQty=309.00000000, executedQty=309.00000000, status=FILLED, timeInForce=GTC, type=LIMIT, side=BUY, stopPrice=0E-8, icebergQty=0E-8, time=1506498038089), ... , BinanceOrder(symbol=BQXBTC, orderId=222222, clientOrderId=p2m9VuQZaA6LhNch6HItMQ, price=0.18200000, origQty=1.00000000, executedQty=0E-8, status=NEW, timeInForce=GTC, type=LIMIT, side=SELL, stopPrice=0E-8, icebergQty=0E-8, time=1508361363677)]</pre>
@@ -171,7 +173,7 @@ System.out.println((new BinanceApi()).allOrders(BinanceSymbol.valueOf("BQXBTC"))
 
 #### Getting My Trades
 ```java
-System.out.println((new BinanceApi()).myTrades(BinanceSymbol.valueOf("BQXBTC")));
+System.out.println(new BinanceApi().getMyTrades(BinanceSymbol.valueOf("BQXBTC")));
 ```
 <details><summary>View Output</summary>
 <pre>[BinanceTrade(id=1321, commissionAsset=BQX, price=0.00018602, qty=38.00000000, commission=0.03800000, time=1506499148055, isBuyer=true, isMaker=true, isBestMatch=true), ... , BinanceTrade(id=6315, commissionAsset=BNB, price=0.00015216, qty=449.00000000, commission=0.10018983, time=1507144715249, isBuyer=true, isMaker=true, isBestMatch=true)]</pre>
@@ -181,28 +183,24 @@ System.out.println((new BinanceApi()).myTrades(BinanceSymbol.valueOf("BQXBTC")))
 #### Withdrawals
 ```java
 String address = "0x1234567890123456789012345678901234567890";
-System.out.println((new BinanceApi()).withdraw("ETH", 0.01, address, ""));
+System.out.println(new BinanceApi().withdraw("ETH", 0.01, address, ""));
 ```
 
 #### Getting All Deposits History
 
-Server side team still works on this endpoint. At the moment of writing that you will just receive a message in Chinese about parameters exception.
-
 ```java
 BinanceHistoryFilter historyFilter = new BinanceHistoryFilter();
-System.out.println((new BinanceApi()).getDepositHistory(historyFilter));
+System.out.println(new BinanceApi().getDepositHistory(historyFilter));
 ```
 
 #### Getting Withdrawal History
-
-Server side team still works on this endpoint. At the moment of writing that you will just receive a message in Chinese about parameters exception.
 
 ```java
 BinanceHistoryFilter historyFilter = new BinanceHistoryFilter("ETH");
 Calendar cal = Calendar.getInstance();
 cal.add(Calendar.MONTH, -3); // only last 3 months
 historyFilter.setStartTime(cal.getTime());
-System.out.println((new BinanceApi()).getWithdrawHistory(historyFilter));
+System.out.println(new BinanceApi().getWithdrawHistory(historyFilter));
 ```
 
 ## Using API - Getting Market Data
