@@ -23,15 +23,15 @@ package com.webcerebrium.binance.datatype;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
+
 
 @Data
 public class BinanceAggregatedTrades {
 
     //
     public long a;
-    public BigDecimal p;
-    public BigDecimal q;
+    public Double p;
+    public Double q;
     public long f;
     public long l;
     public long T;
@@ -39,8 +39,8 @@ public class BinanceAggregatedTrades {
     public boolean M;
 
     public long getTradeId() { return a; }
-    public BigDecimal getPrice() { return p; }
-    public BigDecimal getQuantity() { return q; }
+    public Double getPrice() { return p; }
+    public Double getQuantity() { return q; }
     public long getFirstTradeId() { return f; }
     public long getLastTradeId() { return l; }
     public long getTimestamp() { return T; }

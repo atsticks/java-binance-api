@@ -15,7 +15,7 @@ import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.math.BigDecimal;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -95,14 +95,14 @@ public class BinanceExchangeSymbol {
         return filters.get("MIN_NOTIONAL");
     }
 
-    public BigDecimal getMinNotionalValue() {
+    public Double getMinNotionalValue() {
         if (filters.containsKey("MIN_NOTIONAL")) {
             JsonObject obj = this.getMinNotional();
             if (obj.has("minNotional")) {
-                return obj.get("minNotional").getAsBigDecimal();
+                return obj.get("minNotional").getAsDouble();
             }
         }
-        return BigDecimal.ZERO;
+        return 0d;
     }
 
 }

@@ -10,7 +10,7 @@ package com.webcerebrium.binance.datatype;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
+
 
 /**
  {
@@ -30,11 +30,11 @@ import java.math.BigDecimal;
 public class BinanceTrade {
     public Long id;
     public String commissionAsset;
-    public BigDecimal price;
-    public BigDecimal qty;
-    public BigDecimal commission;
+    public Double price;
+    public Double qty;
+    public Double commission;
     public Long time;
-    public boolean isBuyer;
-    public boolean isMaker;
-    public boolean isBestMatch;
+    public boolean buyer;
+    public boolean maker;
+    public boolean bestMatch;
 }

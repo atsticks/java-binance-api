@@ -11,7 +11,7 @@ import com.google.gson.JsonObject;
 import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.Data;
 
-import java.math.BigDecimal;
+
 
 /*
  {
@@ -57,18 +57,18 @@ public class BinanceEventExecutionReport {
     public BinanceOrderType type;
     public BinanceTimeInForce timeInForce;
 
-    public BigDecimal quantity;
-    public BigDecimal price;
+    public Double quantity;
+    public Double price;
 
     public BinanceExecutionType executionType;
     public BinanceOrderStatus status;
     public BinanceRejectReason rejectReason;
 
     public Long orderId;
-    public BigDecimal quantityOfLastFilledTrade;
-    public BigDecimal accumulatedQuantityOfFilledTrades;
-    public BigDecimal priceOfLastFilledTrade;
-    public BigDecimal commission;
+    public Double quantityOfLastFilledTrade;
+    public Double accumulatedQuantityOfFilledTrades;
+    public Double priceOfLastFilledTrade;
+    public Double commission;
 
     public String assetOfCommission;
     public Long tradeTime;
@@ -84,8 +84,8 @@ public class BinanceEventExecutionReport {
         type = BinanceOrderType.valueOf(event.get("o").getAsString());
         timeInForce = BinanceTimeInForce.valueOf(event.get("f").getAsString());
 
-        price = event.get("p").getAsBigDecimal();
-        quantity = event.get("q").getAsBigDecimal();
+        price = event.get("p").getAsDouble();
+        quantity = event.get("q").getAsDouble();
 
         executionType = BinanceExecutionType.valueOf(event.get("x").getAsString());
         status = BinanceOrderStatus.valueOf(event.get("X").getAsString());
@@ -93,10 +93,10 @@ public class BinanceEventExecutionReport {
 
         orderId = event.get("i").getAsLong();
 
-        quantityOfLastFilledTrade = event.get("l").getAsBigDecimal();
-        accumulatedQuantityOfFilledTrades = event.get("z").getAsBigDecimal();
-        priceOfLastFilledTrade = event.get("L").getAsBigDecimal();
-        commission = event.get("n").getAsBigDecimal();
+        quantityOfLastFilledTrade = event.get("l").getAsDouble();
+        accumulatedQuantityOfFilledTrades = event.get("z").getAsDouble();
+        priceOfLastFilledTrade = event.get("L").getAsDouble();
+        commission = event.get("n").getAsDouble();
 
         //assetOfCommission = event.get("N").getAsString();
         assetOfCommission = (event.get("N").isJsonNull()? "" : event.get("N").getAsString()); // Binance API returns null for orders, only used for trades

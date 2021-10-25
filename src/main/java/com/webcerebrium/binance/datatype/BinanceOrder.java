@@ -28,21 +28,21 @@ package com.webcerebrium.binance.datatype;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
+
 
 @Data
 public class BinanceOrder {
     public String symbol;
     public Long orderId;
     public String clientOrderId;
-    public BigDecimal price;
-    public BigDecimal origQty;
-    public BigDecimal executedQty;
+    public Double price;
+    public Double origQty;
+    public Double executedQty;
     public BinanceOrderStatus status;
     public BinanceTimeInForce timeInForce;
     public BinanceOrderType type;
     public BinanceOrderSide side;
-    public BigDecimal stopPrice;
-    public BigDecimal icebergQty;
+    public Double stopPrice;
+    public Double icebergQty;
     public Long time;
 }

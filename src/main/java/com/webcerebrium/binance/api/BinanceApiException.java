@@ -8,7 +8,7 @@ package com.webcerebrium.binance.api;
  * Released under the MIT License
  * ============================================================ */
 
- public class BinanceApiException extends Throwable {
+ public class BinanceApiException extends RuntimeException {
      public BinanceApiException(String message) {
          super(message);
      }

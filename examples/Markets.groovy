@@ -7,7 +7,7 @@ import com.webcerebrium.binance.api.BinanceApiException
 try {
   def api = new BinanceApi();
 
-  println(api.pricesMap());
+  println(api.getAllrices());
 
 
 } catch (BinanceApiException e) {

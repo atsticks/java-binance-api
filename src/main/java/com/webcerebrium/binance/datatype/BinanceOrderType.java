@@ -13,5 +13,6 @@ public enum BinanceOrderType {
     MARKET,
     LIMIT_MAKER,
     STOP_LOSS_LIMIT,
-    TAKE_PROFIT_LIMIT
+    TAKE_PROFIT_LIMIT;
+
 }

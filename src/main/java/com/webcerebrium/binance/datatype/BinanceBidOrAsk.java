@@ -10,20 +10,20 @@ package com.webcerebrium.binance.datatype;
 import com.google.gson.JsonArray;
 import lombok.Data;
 
-import java.math.BigDecimal;
+
 
 @Data
 public class BinanceBidOrAsk {
 
     public BinanceBidType type;
-    public BigDecimal price = null;
-    public BigDecimal quantity = null;
+    public Double price = null;
+    public Double quantity = null;
 
     public BinanceBidOrAsk() {}
 
     public BinanceBidOrAsk(BinanceBidType type, JsonArray arr) {
         this.type = type;
-        this.price = arr.get(0).getAsBigDecimal();
-        this.quantity = arr.get(1).getAsBigDecimal();
+        this.price = arr.get(0).getAsDouble();
+        this.quantity = arr.get(1).getAsDouble();
     }
 }

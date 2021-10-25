@@ -12,7 +12,7 @@ import com.google.gson.JsonObject;
 import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.Data;
 
-import java.math.BigDecimal;
+
 
 /**
  {
@@ -34,8 +34,8 @@ public class BinanceEventAggTrade {
     public Long eventTime;
     public BinanceSymbol symbol;
     public Long aggregatedTradeId;
-    public BigDecimal price;
-    public BigDecimal quantity;
+    public Double price;
+    public Double quantity;
     public Long firstBreakdownTradeId;
     public Long lastBreakdownTradeId;
     public Long tradeTime;
@@ -45,8 +45,8 @@ public class BinanceEventAggTrade {
         eventTime = event.get("E").getAsLong();
         symbol = BinanceSymbol.valueOf(event.get("s").getAsString());
         aggregatedTradeId = event.get("a").getAsLong();
-        price = event.get("p").getAsBigDecimal();
-        quantity = event.get("q").getAsBigDecimal();
+        price = event.get("p").getAsDouble();
+        quantity = event.get("q").getAsDouble();
         firstBreakdownTradeId = event.get("f").getAsLong();
         lastBreakdownTradeId = event.get("l").getAsLong();
         tradeTime = event.get("T").getAsLong();

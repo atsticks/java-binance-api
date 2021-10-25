@@ -12,7 +12,7 @@ import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.math.BigDecimal;
+
 /*
     {
         "e": "kline",							// event type
@@ -54,18 +54,18 @@ public class BinanceEventKline {
     public Long firstTradeId;
     public Long lastTradeId;
 
-    public BigDecimal open;
-    public BigDecimal close;
-    public BigDecimal high;
-    public BigDecimal low;
-    public BigDecimal volume;
+    public Double open;
+    public Double close;
+    public Double high;
+    public Double low;
+    public Double volume;
 
     public Long numberOfTrades;
     public boolean isFinal;
 
-    public BigDecimal quoteVolume;
-    public BigDecimal volumeOfActiveBuy;
-    public BigDecimal quoteVolumeOfActiveBuy;
+    public Double quoteVolume;
+    public Double volumeOfActiveBuy;
+    public Double quoteVolumeOfActiveBuy;
 
     public BinanceEventKline(JsonObject event) throws BinanceApiException {
         eventTime = event.get("E").getAsLong();
@@ -81,17 +81,17 @@ public class BinanceEventKline {
         firstTradeId  = k.get("f").getAsLong();
         lastTradeId  = k.get("L").getAsLong();
 
-        open = k.get("o").getAsBigDecimal();
-        close = k.get("c").getAsBigDecimal();
-        high = k.get("h").getAsBigDecimal();
-        low = k.get("l").getAsBigDecimal();
-        volume = k.get("v").getAsBigDecimal();
+        open = k.get("o").getAsDouble();
+        close = k.get("c").getAsDouble();
+        high = k.get("h").getAsDouble();
+        low = k.get("l").getAsDouble();
+        volume = k.get("v").getAsDouble();
 
         numberOfTrades  = k.get("n").getAsLong();
         isFinal  = k.get("x").getAsBoolean();
 
-        quoteVolume = k.get("q").getAsBigDecimal();
-        volumeOfActiveBuy = k.get("V").getAsBigDecimal();
-        quoteVolumeOfActiveBuy = k.get("Q").getAsBigDecimal();
+        quoteVolume = k.get("q").getAsDouble();
+        volumeOfActiveBuy = k.get("V").getAsDouble();
+        quoteVolumeOfActiveBuy = k.get("Q").getAsDouble();
     }
 }

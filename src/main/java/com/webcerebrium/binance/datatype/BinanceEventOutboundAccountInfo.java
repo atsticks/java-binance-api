@@ -67,7 +67,7 @@ public class BinanceEventOutboundAccountInfo {
     public boolean canTrade;
     public boolean canWithdraw;
     public boolean canDeposit;
-    public List<BinanceWalletAsset> balances;
+    public List<BinanceAsset> balances;
 
     public BinanceEventOutboundAccountInfo(JsonObject event) {
         eventTime = event.get("E").getAsLong();
@@ -83,7 +83,10 @@ public class BinanceEventOutboundAccountInfo {
         balances = new LinkedList<>();
         JsonArray b = event.get("B").getAsJsonArray();
         for (JsonElement asset : b) {
-            balances.add(new BinanceWalletAsset(asset.getAsJsonObject()));
+            JsonObject ob = asset.getAsJsonObject();
+            BinanceAsset basset = new BinanceAsset(ob.get("name").getAsString());
+            basset.read(ob);
+            balances.add(basset);
         }
     }
 }

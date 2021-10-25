@@ -11,11 +11,7 @@ package com.webcerebrium.binance.api;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.webcerebrium.binance.datatype.BinanceAggregatedTrades;
-import com.webcerebrium.binance.datatype.BinanceCandlestick;
-import com.webcerebrium.binance.datatype.BinanceInterval;
-import com.webcerebrium.binance.datatype.BinanceSymbol;
-import com.webcerebrium.binance.datatype.BinanceTicker;
+import com.webcerebrium.binance.datatype.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +40,7 @@ public class MarketDataEndpointsTest {
 
     @Test
     public void testDepthEndpoint() throws Exception, BinanceApiException {
-        JsonObject jsonObject = binanceApi.depth(symbol);
+        JsonObject jsonObject = binanceApi.getDepth(symbol);
 
         assertTrue("depth response should contain lastUpdateId", jsonObject.has("lastUpdateId"));
         assertTrue("depth response should contain bids", jsonObject.has("bids"));
@@ -59,15 +55,15 @@ public class MarketDataEndpointsTest {
 
     @Test
     public void testAggTradesEndpoint() throws Exception, BinanceApiException {
-        List<BinanceAggregatedTrades> binanceAggregatedTrades = binanceApi.aggTrades(symbol, 5, null);
+        List<BinanceAggregatedTrades> binanceAggregatedTrades = binanceApi.getAggregatedTrades(symbol, 5, null);
 
         assertTrue("Aggregated trades array should be received", binanceAggregatedTrades.size() > 0);
         // check human-looking getters for the first picked trade
         BinanceAggregatedTrades trade = binanceAggregatedTrades.get(0);
 
         assertTrue("First Trade should contain tradeId", trade.getTradeId() > 0);
-        assertTrue("First Trade should contain price", trade.getPrice().compareTo(BigDecimal.ZERO) > 0);
-        assertTrue("First Trade should contain quantity", trade.getQuantity().compareTo(BigDecimal.ZERO) > 0);
+        assertTrue("First Trade should contain price", trade.getPrice().compareTo(0d) > 0);
+        assertTrue("First Trade should contain quantity", trade.getQuantity().compareTo(0d) > 0);
         assertTrue("First Trade should contain firstTradeId", trade.getFirstTradeId() > 0);
         assertTrue("First Trade should contain lastTradeId", trade.getLastTradeId() > 0);
         assertTrue("First Trade should contain timestamp", trade.getTimestamp() > 0);
@@ -83,15 +79,15 @@ public class MarketDataEndpointsTest {
         Long timeStart = cal.getTime().getTime();
 
         Map<String, Long> options = ImmutableMap.of("startTime", timeStart, "endTime", timeEnd);
-        List<BinanceAggregatedTrades> binanceAggregatedTrades = binanceApi.aggTrades(symbol, 5, options);
+        List<BinanceAggregatedTrades> binanceAggregatedTrades = binanceApi.getAggregatedTrades(symbol, 5, options);
 
         assertTrue("Aggregated trades array should be received", binanceAggregatedTrades.size() > 0);
         // check human-looking getters for the first picked trade
         BinanceAggregatedTrades trade = binanceAggregatedTrades.get(0);
 
         assertTrue("First Trade should contain tradeId", trade.getTradeId() > 0);
-        assertTrue("First Trade should contain price", trade.getPrice().compareTo(BigDecimal.ZERO) > 0);
-        assertTrue("First Trade should contain quantity", trade.getQuantity().compareTo(BigDecimal.ZERO) > 0);
+        assertTrue("First Trade should contain price", trade.getPrice().compareTo(0d) > 0);
+        assertTrue("First Trade should contain quantity", trade.getQuantity().compareTo(0d) > 0);
         assertTrue("First Trade should contain firstTradeId", trade.getFirstTradeId() > 0);
         assertTrue("First Trade should contain lastTradeId", trade.getLastTradeId() > 0);
         assertTrue("First Trade should contain timestamp", trade.getTimestamp() > 0);
@@ -107,7 +103,7 @@ public class MarketDataEndpointsTest {
     @Test
     public void testKlinesEndpoint() throws Exception, BinanceApiException {
         // checking intervals
-        List<BinanceCandlestick> klines = binanceApi.klines(symbol, BinanceInterval.FIFTEEN_MIN, 5, null);
+        List<BinanceCandlestick> klines = binanceApi.getCandlestickBars(symbol, BinanceInterval.FIFTEEN_MIN, 5, null);
         assertTrue("Klines should return non-empty array of candlesticks", klines.size() > 0);
 
         BinanceCandlestick firstCandlestick = klines.get(0);
@@ -135,7 +131,7 @@ public class MarketDataEndpointsTest {
         Long timeStart = cal.getTime().getTime();
 
         Map<String, Long> options = ImmutableMap.of("startTime", timeStart, "endTime", timeEnd);
-        List<BinanceCandlestick> klines = binanceApi.klines(symbol, BinanceInterval.FIFTEEN_MIN, 50, options);
+        List<BinanceCandlestick> klines = binanceApi.getCandlestickBars(symbol, BinanceInterval.FIFTEEN_MIN, 50, options);
         assertTrue("Klines should return non-empty array of candlesticks", klines.size() > 0);
 
         BinanceCandlestick firstCandlestick = klines.get(0);
@@ -156,52 +152,26 @@ public class MarketDataEndpointsTest {
 
     @Test
     public void testTicker24hrWithoutSymbolEndpoint() throws Exception, BinanceApiException {
-        JsonArray json = binanceApi.ticker24hr();
+        List<BinanceTicker24> json = binanceApi.get24HrPriceStatistics();
         log.info("{}", json.toString());
     }
 
     @Test
     public void testTicker24hrEndpoint() throws Exception, BinanceApiException {
-        JsonObject jsonObject = binanceApi.ticker24hr(symbol);
-
-        assertTrue("24hr ticker should contain priceChange", jsonObject.has("priceChange"));
-        assertTrue("24hr ticker should contain priceChangePercent", jsonObject.has("priceChangePercent"));
-        assertTrue("24hr ticker should contain weightedAvgPrice", jsonObject.has("weightedAvgPrice"));
-        assertTrue("24hr ticker should contain prevClosePrice", jsonObject.has("prevClosePrice"));
-        assertTrue("24hr ticker should contain lastPrice", jsonObject.has("lastPrice"));
-        assertTrue("24hr ticker should contain lastQty", jsonObject.has("lastQty"));
-        assertTrue("24hr ticker should contain bidPrice", jsonObject.has("bidPrice"));
-        assertTrue("24hr ticker should contain bidQty", jsonObject.has("bidQty"));
-        assertTrue("24hr ticker should contain askQty", jsonObject.has("askQty"));
-        assertTrue("24hr ticker should contain askQty", jsonObject.has("askQty"));
-        assertTrue("24hr ticker should contain openPrice", jsonObject.has("openPrice"));
-        assertTrue("24hr ticker should contain highPrice", jsonObject.has("highPrice"));
-        assertTrue("24hr ticker should contain lowPrice", jsonObject.has("lowPrice"));
-        assertTrue("24hr ticker should contain volume", jsonObject.has("volume"));
-        assertTrue("24hr ticker should contain quoteVolume", jsonObject.has("quoteVolume"));
-        assertTrue("24hr ticker should contain openTime", jsonObject.has("openTime"));
-        assertTrue("24hr ticker should contain closeTime", jsonObject.has("closeTime"));
-        assertTrue("24hr ticker should contain firstId", jsonObject.has("firstId"));
-        assertTrue("24hr ticker should contain lastId", jsonObject.has("lastId"));
-        assertTrue("24hr ticker should contain count", jsonObject.has("count"));
+        BinanceTicker24 jsonObject = binanceApi.get24HrPriceStatistics(symbol);
+        assertNotNull(jsonObject);
     }
 
     @Test
     public void testAllPricesEndpoint() throws Exception, BinanceApiException {
-        BigDecimal ethbtc = binanceApi.pricesMap().get(symbol.toString());
-        assertTrue("There should be price for " + symbol.toString(), ethbtc.compareTo(BigDecimal.valueOf(0)) > 0);
+        Double ethbtc = binanceApi.getPrices().get(symbol.toString());
+        assertTrue("There should be price for " + symbol.toString(), ethbtc.compareTo(0d) > 0);
     }
 
     @Test
     public void testAllBookTickersEndpoint() throws Exception, BinanceApiException {
-        JsonArray tickers = binanceApi.allBookTickers();
-        assertTrue("There should be some tickers", tickers.size() > 0);
-    }
-
-    @Test
-    public void testAllBookTickersMapping() throws Exception, BinanceApiException {
-        Map<String, BinanceTicker> mapTickers = binanceApi.allBookTickersMap();
-        assertTrue("Tickers should be mapped", mapTickers.size() > 0);
+        Map<String,BinanceTicker> mapTickers = binanceApi.getAllBookTickers();
+        assertTrue("There should be some tickers", mapTickers.size() > 0);
         assertTrue("There should be ticker for symbol", mapTickers.containsKey(symbol.toString()));
 
         String s = symbol.toString();

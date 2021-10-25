@@ -12,24 +12,26 @@ import com.google.common.base.Strings;
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;
 import com.webcerebrium.binance.api.BinanceApiException;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
-import java.math.BigDecimal;
 
 @Data
+@RequiredArgsConstructor
 public class BinanceOrderPlacement {
+    @NonNull
     public BinanceSymbol symbol = null;
+    @NonNull
     public BinanceOrderSide side = null;
     public BinanceOrderType type = BinanceOrderType.LIMIT;
     public BinanceTimeInForce timeInForce = BinanceTimeInForce.GOOD_TILL_CANCELLED;
-    public BigDecimal quantity;
-    public BigDecimal price;
+    public Double quantity;
+    public Double price;
     public String newClientOrderId = "";
-    public BigDecimal stopPrice = null;
-    public BigDecimal icebergQty = null;
-
-    public BinanceOrderPlacement() {
-    }
+    public Double stopPrice = null;
+    public Double icebergQty = null;
 
     public BinanceOrderPlacement(BinanceSymbol symbol, BinanceOrderSide side) {
         this.symbol = symbol;
@@ -51,7 +53,7 @@ public class BinanceOrderPlacement {
             throw new BinanceApiException("Order type is not set");
         }
         sb.append("&type=").append(type.toString());
-        if (quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
+        if (quantity == null || quantity.compareTo(0d) <= 0) {
             throw new BinanceApiException("Order quantity should be bigger than zero");
         }
         sb.append("&quantity=").append(quantity.toString());
@@ -64,7 +66,7 @@ public class BinanceOrderPlacement {
                 throw new BinanceApiException("Order timeInForce is not set");
             }
             sb.append("&timeInForce=").append(timeInForce.toString());
-            if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
+            if (price == null || price.compareTo(0d) <= 0) {
                 throw new BinanceApiException("Order price should be bigger than zero");
             }
             sb.append("&price=").append(price.toString());

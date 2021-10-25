@@ -14,7 +14,7 @@ import com.google.gson.JsonArray;
 import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.Data;
 
-import java.math.BigDecimal;
+
 
 /*
   [
@@ -37,16 +37,16 @@ import java.math.BigDecimal;
 public class BinanceCandlestick {
 
     public Long openTime = null;
-    public BigDecimal open = null;
-    public BigDecimal high = null;
-    public BigDecimal low = null;
-    public BigDecimal close = null;
-    public BigDecimal volume = null;
+    public Double open = null;
+    public Double high = null;
+    public Double low = null;
+    public Double close = null;
+    public Double volume = null;
     public Long closeTime = null;
-    public BigDecimal quoteAssetVolume = null;
+    public Double quoteAssetVolume = null;
     public Long numberOfTrades = null;
-    public BigDecimal takerBuyBaseAssetVolume = null;
-    public BigDecimal takerBuyQuoteAssetVolume = null;
+    public Double takerBuyBaseAssetVolume = null;
+    public Double takerBuyQuoteAssetVolume = null;
 
     public BinanceCandlestick(JsonArray jsonArray) throws BinanceApiException {
         if (jsonArray.size() < 11) {
@@ -54,15 +54,15 @@ public class BinanceCandlestick {
                     + jsonArray.size() + " found");
         }
         setOpenTime(jsonArray.get(0).getAsLong());
-        setOpen(jsonArray.get(1).getAsBigDecimal());
-        setHigh(jsonArray.get(2).getAsBigDecimal());
-        setLow(jsonArray.get(3).getAsBigDecimal());
-        setClose(jsonArray.get(4).getAsBigDecimal());
-        setVolume(jsonArray.get(5).getAsBigDecimal());
+        setOpen(jsonArray.get(1).getAsDouble());
+        setHigh(jsonArray.get(2).getAsDouble());
+        setLow(jsonArray.get(3).getAsDouble());
+        setClose(jsonArray.get(4).getAsDouble());
+        setVolume(jsonArray.get(5).getAsDouble());
         setCloseTime(jsonArray.get(6).getAsLong());
-        setQuoteAssetVolume(jsonArray.get(7).getAsBigDecimal());
+        setQuoteAssetVolume(jsonArray.get(7).getAsDouble());
         setNumberOfTrades(jsonArray.get(8).getAsLong());
-        setTakerBuyBaseAssetVolume(jsonArray.get(9).getAsBigDecimal());
-        setTakerBuyQuoteAssetVolume(jsonArray.get(10).getAsBigDecimal());
+        setTakerBuyBaseAssetVolume(jsonArray.get(9).getAsDouble());
+        setTakerBuyQuoteAssetVolume(jsonArray.get(10).getAsDouble());
     }
 }

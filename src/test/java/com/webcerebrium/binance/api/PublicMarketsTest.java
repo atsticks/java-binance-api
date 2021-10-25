@@ -28,13 +28,13 @@ public class PublicMarketsTest {
 
     @Test
     public void testPublicMarkets() throws Exception, BinanceApiException {
-        BinanceExchangeStats binanceExchangeStats = binanceApi.publicStats();
+        BinanceExchangeStats binanceExchangeStats = binanceApi.getPublicExchangeStats();
         log.info("Public Exchange Stats (not documented): {}", binanceExchangeStats.toString());
     }
 
     @Test
     public void testExchangeInfo() throws Exception, BinanceApiException {
-        BinanceExchangeInfo binanceExchangeInfo = binanceApi.exchangeInfo();
+        BinanceExchangeInfo binanceExchangeInfo = binanceApi.getExchangeInfo();
         List<BinanceExchangeSymbol> symbols = binanceExchangeInfo.getSymbols();
         // BinanceExchangeSymbol BNB = symbols.stream().filter(a -> a.getQuoteAsset().equals("BNB")).findFirst().get();
         // log.info("BNB Lot Size: {}", BNB.getLotSize().toString());

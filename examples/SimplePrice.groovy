@@ -6,7 +6,7 @@ import com.webcerebrium.binance.api.BinanceApiException;
 
 try {
   def api = new BinanceApi();
-  println( "ETH-BTC PRICE=" + api.pricesMap().get("ETHBTC"));
+  println( "ETH-BTC PRICE=" + api.getAllrices().get("ETHBTC"));
 } catch (BinanceApiException e) {
   println( "ERROR: " + e.getMessage());
 }

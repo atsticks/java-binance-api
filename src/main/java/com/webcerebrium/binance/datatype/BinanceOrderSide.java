@@ -10,5 +10,15 @@ package com.webcerebrium.binance.datatype;
 
 public enum BinanceOrderSide {
     BUY,
-    SELL
+    SELL;
+
+    int getNumeric(){
+        switch(this){
+            case BUY:
+                return 1;
+            case SELL:
+            default:
+                return 2;
+        }
+    }
 }

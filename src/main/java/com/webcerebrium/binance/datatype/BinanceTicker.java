@@ -16,15 +16,24 @@ package com.webcerebrium.binance.datatype;
 "askQty": "9.00000000"
 */
 
+import com.google.gson.JsonObject;
 import lombok.Data;
 
-import java.math.BigDecimal;
+
 
 @Data
 public class BinanceTicker {
     public String symbol = null;
-    public BigDecimal bidPrice = null;
-    public BigDecimal bidQty = null;
-    public BigDecimal askPrice = null;
-    public BigDecimal askQty = null;
+    public Double bidPrice = null;
+    public Double bidQty = null;
+    public Double askPrice = null;
+    public Double askQty = null;
+
+    public void read(JsonObject ob){
+        askPrice = ob.get("askPrice").getAsDouble();
+        askQty = ob.get("askQty").getAsDouble();
+        bidPrice = ob.get("bidPrice").getAsDouble();
+        bidQty = ob.get("bidQty").getAsDouble();
+    }
+
 }

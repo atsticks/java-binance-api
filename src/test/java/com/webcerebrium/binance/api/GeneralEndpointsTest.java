@@ -33,7 +33,7 @@ public class GeneralEndpointsTest {
 
     @Test
     public void testServerTimeIsAlmostSameAsLocal() throws Exception, BinanceApiException {
-        JsonObject time = binanceApi.time();
+        JsonObject time = binanceApi.getServerTime();
         assertTrue("serverTime should be received", time.has("serverTime"));
         long serverTime = time.get("serverTime").getAsLong();
         long localTime = (new Date()).getTime();

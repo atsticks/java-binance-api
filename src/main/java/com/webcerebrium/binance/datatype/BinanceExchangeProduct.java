@@ -5,7 +5,7 @@ import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.math.BigDecimal;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,28 +13,28 @@ import java.util.Set;
 @Slf4j
 public class BinanceExchangeProduct {
     boolean active;
-    BigDecimal activeBuy;
-    BigDecimal activeSell;
+    Double activeBuy;
+    Double activeSell;
     String baseAsset;
     String baseAssetUnit;
-    BigDecimal close;
+    Double close;
     Long decimalPlaces;
-    BigDecimal high;
+    Double high;
     Long lastAggTradeId;
-    BigDecimal low;
+    Double low;
     String matchingUnitType;
-    BigDecimal minQty;
-    BigDecimal minTrade;
-    BigDecimal open;
-    BigDecimal prevClose;
+    Double minQty;
+    Double minTrade;
+    Double open;
+    Double prevClose;
     String quoteAsset;
     String quoteAssetUnit;
     String status;
     BinanceSymbol symbol;
-    BigDecimal tickSize;
-    BigDecimal tradedMoney;
-    BigDecimal volume;
-    BigDecimal withdrawFee;
+    Double tickSize;
+    Double tradedMoney;
+    Double volume;
+    Double withdrawFee;
 
     public BinanceExchangeProduct() {
     }
@@ -48,10 +48,10 @@ public class BinanceExchangeProduct {
         }
     }
 
-    private BigDecimal safeDecimal(JsonObject obj, String field) {
+    private Double safeDecimal(JsonObject obj, String field) {
         if (obj.has(field) && obj.get(field).isJsonPrimitive() && obj.get(field) != null) {
             try {
-                return obj.get(field).getAsBigDecimal();
+                return obj.get(field).getAsDouble();
             } catch (java.lang.NumberFormatException nfe) {
                 log.info("Number format exception in field={} value={} trade={}", field, obj.get(field), obj.toString());
             }
