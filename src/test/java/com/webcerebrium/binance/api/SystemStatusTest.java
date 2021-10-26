@@ -2,6 +2,7 @@ package com.webcerebrium.binance.api;
 
 
 import com.google.gson.JsonObject;
+import com.webcerebrium.binance.datatype.BinanceSystemStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,7 +18,7 @@ public class SystemStatusTest {
 
     @Test
     public void testSystemStatus() throws Exception, BinanceApiException {
-        JsonObject status = binanceApi.getSystemStatus();
+        BinanceSystemStatus status = binanceApi.getSystemStatus();
         log.info("Status {}", status.toString() );
     }
 }

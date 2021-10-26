@@ -41,10 +41,12 @@ public class UserDataStreamTest {
             }
         });
         Thread.sleep(2000);
-        log.info("KEEPING ALIVE=" + binanceApi.keepUserDataStream(listenKey));
+        log.info("KEEPING ALIVE...");
+        binanceApi.keepUserDataStream(listenKey);
         Thread.sleep(2000);
         session.close();
-        log.info("DELETED=" + binanceApi.deleteUserDataStream(listenKey));
+        log.info("DELETED...");
+        binanceApi.deleteUserDataStream(listenKey);
     }
 }
 

@@ -16,9 +16,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  {
@@ -42,27 +40,37 @@ import java.util.List;
 @Data
 public class BinanceExchangeSymbol {
 
-    BinanceSymbol symbol;
+    String symbol;
     String status;
     String baseAsset;
     Long baseAssetPrecision;
+    Long baseCommissionPrecision;
     String quoteAsset;
-    Long quotePrecision;
+    Long quoteAssetPrecision;
+    Long quoteCommissionPrecision;
     List<BinanceOrderType> orderTypes = new LinkedList<>();
     boolean icebergAllowed;
-    HashMap<String, JsonObject> filters = new HashMap<>();
+    boolean ocoAllowed;
+    boolean quoteOrderQtyMarketAllowed;
+    boolean spotTradingAllowed;
+    boolean marginTradingAllowed;
+    Map<String, BinanceExchangeFilter> filters = new HashMap<>();
+    List<String> permissions = new ArrayList<>();
 
     public BinanceExchangeSymbol(JsonObject obj) throws BinanceApiException {
-        // log.debug("Reading Symbol {}, {}", obj.get("symbol").getAsString(), obj.toString());
-
-        symbol = BinanceSymbol.valueOf(obj.get("symbol").getAsString());
+        symbol = obj.get("symbol").getAsString();
         status = obj.get("status").getAsString();
-
         baseAsset = obj.get("baseAsset").getAsString();
         baseAssetPrecision = obj.get("baseAssetPrecision").getAsLong();
         quoteAsset = obj.get("quoteAsset").getAsString();
-        quotePrecision = obj.get("quotePrecision").getAsLong();
+        quoteAssetPrecision = obj.get("quotePrecision").getAsLong();
+        quoteCommissionPrecision = obj.get("quoteCommissionPrecision").getAsLong();
+        baseCommissionPrecision = obj.get("baseCommissionPrecision").getAsLong();
         icebergAllowed = obj.get("icebergAllowed").getAsBoolean();
+        ocoAllowed = obj.get("ocoAllowed").getAsBoolean();
+        quoteOrderQtyMarketAllowed = obj.get("quoteOrderQtyMarketAllowed").getAsBoolean();
+        spotTradingAllowed = obj.get("isSpotTradingAllowed").getAsBoolean();
+        marginTradingAllowed = obj.get("isMarginTradingAllowed").getAsBoolean();
 
         if (obj.has("orderTypes") && obj.get("orderTypes").isJsonArray()) {
             JsonArray arrOrderTypes = obj.get("orderTypes").getAsJsonArray();
@@ -76,33 +84,121 @@ public class BinanceExchangeSymbol {
             JsonArray arrFilters = obj.get("filters").getAsJsonArray();
             filters.clear();
             for (JsonElement entry: arrFilters) {
-                JsonObject item = entry.getAsJsonObject();
-                String key = item.get("filterType").getAsString();
-                filters.put(key, item);
+                BinanceExchangeFilter filter = new BinanceExchangeFilter(entry.getAsJsonObject());
+                filters.put(filter.getFilterType(), filter);
             }
         }
     }
 
-    public JsonObject getPriceFilter() {
-        return filters.get("PRICE_FILTER");
+    public static class BinanceLotSize extends BinanceExchangeFilter{
+
+        public static BinanceLotSize of(BinanceExchangeFilter f) {
+            if(f!=null){
+                return new BinanceLotSize(f);
+            }
+            return null;
+        }
+
+        public BinanceLotSize(BinanceExchangeFilter filter) {
+            super(filter.getData());
+        }
+
+        public Double getMinQty(){
+            return getDouble("minQty");
+        }
+
+        public Double getMaxQty(){
+            return getDouble("maxQty");
+        }
+
+        public Double getStepSize(){
+            return getDouble("stepSize");
+        }
+
+    }
+    public static class BinancePriceFilter extends BinanceExchangeFilter{
+
+        public static BinancePriceFilter of(BinanceExchangeFilter f) {
+            if(f!=null){
+                return new BinancePriceFilter(f);
+            }
+            return null;
+        }
+
+        public BinancePriceFilter(BinanceExchangeFilter filter) {
+            super(filter.getData());
+        }
+        public Double getMinPrice(){
+            return getDouble("minPrice");
+        }
+
+        public Double getMaxPrice(){
+            return getDouble("maxPrice");
+        }
+
+        public Double getTickSize(){
+            return getDouble("tickSize");
+        }
+
+    }
+    public static class BinanceMinNotional extends BinanceExchangeFilter{
+
+        public BinanceMinNotional(BinanceExchangeFilter filter) {
+            super(filter.getData());
+        }
+
+        public static BinanceMinNotional of(BinanceExchangeFilter f) {
+            if(f!=null){
+                return new BinanceMinNotional(f);
+            }
+            return null;
+        }
+
+        public Double getMinNotionale(){
+            return getDouble("minNotional");
+        }
+
+        public Boolean getApplyToMarket(){
+            return getBoolean("applyToMarket");
+        }
+
+        public Integer getAvgPriceMinse(){
+            return getInteger("avgPriceMins");
+        }
+
     }
 
-    public JsonObject getLotSize() {
-        return filters.get("LOT_SIZE");
+
+    public BinancePriceFilter getPriceFilter() {
+        return BinancePriceFilter.of(filters.get("PRICE_FILTER"));
     }
 
-    public JsonObject getMinNotional() {
-        return filters.get("MIN_NOTIONAL");
+    public BinanceLotSize getLotSize() {
+        return BinanceLotSize.of(filters.get("LOT_SIZE"));
+    }
+
+    public BinanceLotSize getMarketLotSize() {
+        return BinanceLotSize.of(filters.get("MARKET_LOT_SIZE"));
+    }
+
+    public BinanceMinNotional getMinNotional() {
+        return BinanceMinNotional.of(filters.get("MIN_NOTIONAL"));
     }
 
     public Double getMinNotionalValue() {
         if (filters.containsKey("MIN_NOTIONAL")) {
-            JsonObject obj = this.getMinNotional();
-            if (obj.has("minNotional")) {
-                return obj.get("minNotional").getAsDouble();
-            }
+            BinanceExchangeFilter obj = this.getMinNotional();
+            return obj.getDouble("MIN_NOTIONAL");
         }
         return 0d;
+    }
+
+    public Long getMaxNumOrders() {
+        if (filters.containsKey("MAX_NUM_ORDERS")) {
+            BinanceExchangeFilter obj = filters.get("MAX_NUM_ORDERS");
+            return obj.getLong("maxNumOrders");
+        }
+        return 0L;
     }
 
 }

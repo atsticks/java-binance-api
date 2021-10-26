@@ -40,17 +40,10 @@ public class MarketDataEndpointsTest {
 
     @Test
     public void testDepthEndpoint() throws Exception, BinanceApiException {
-        JsonObject jsonObject = binanceApi.getDepth(symbol);
+        BinanceDepth d = binanceApi.getDepth(symbol);
 
-        assertTrue("depth response should contain lastUpdateId", jsonObject.has("lastUpdateId"));
-        assertTrue("depth response should contain bids", jsonObject.has("bids"));
-        JsonArray bids = jsonObject.get("bids").getAsJsonArray();
-        assertTrue("depth response should contain non-empty array bids", bids.size() > 0);
-        assertTrue(bids.get(0).getAsJsonArray().size() > 2);
-        assertTrue("depth response should contain asks", jsonObject.has("asks"));
-        JsonArray asks = jsonObject.get("asks").getAsJsonArray();
-        assertTrue("depth response should contain non-empty array asks", asks.size() > 0);
-        assertTrue(asks.get(0).getAsJsonArray().size() > 2);
+        assertNotNull("depth response should contain non-empty array bids", d.getBids());
+        assertNotNull("depth response should contain non-empty array asks", d.getAsks());
     }
 
     @Test

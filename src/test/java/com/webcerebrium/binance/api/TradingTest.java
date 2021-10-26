@@ -45,7 +45,7 @@ public class TradingTest {
     public void tearDown() throws Exception {
         if (order != null) {
             try {
-                JsonObject jsonObject = binanceApi.deleteOrder(order);
+                BinanceDeletedOrder jsonObject = binanceApi.deleteOrder(order);
                 log.info("Deleted order = {}", jsonObject.toString());
             } catch (BinanceApiException e) {
                 log.info("Order clean up (non-critical) exception = {}", e.toString());
@@ -94,9 +94,9 @@ public class TradingTest {
             Double qty = Double.valueOf(walletAsset.getFree().longValue());
             if (qty.compareTo(0d) > 0) {
                 placement.setQuantity(qty); // sell some of our asset for 1 BTC each
-                JsonObject jsonObject = binanceApi.createOrder(placement);
+                BinanceNewOrder jsonObject = binanceApi.createOrder(placement);
                 log.info("Order Placement = {}", jsonObject.toString());
-                order = binanceApi.getOrderById(symbol, jsonObject.get("orderId").getAsLong());
+                order = binanceApi.getOrderById(symbol, jsonObject.getOrderId());
                 System.out.println(order);
             }
         }

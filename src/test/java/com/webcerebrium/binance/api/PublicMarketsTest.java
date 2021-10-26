@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 
@@ -35,14 +36,19 @@ public class PublicMarketsTest {
     @Test
     public void testExchangeInfo() throws Exception, BinanceApiException {
         BinanceExchangeInfo binanceExchangeInfo = binanceApi.getExchangeInfo();
-        List<BinanceExchangeSymbol> symbols = binanceExchangeInfo.getSymbols();
+        Set<String> symbols = binanceExchangeInfo.getSymbols();
         // BinanceExchangeSymbol BNB = symbols.stream().filter(a -> a.getQuoteAsset().equals("BNB")).findFirst().get();
         // log.info("BNB Lot Size: {}", BNB.getLotSize().toString());
         symbols
         .stream()
-        .filter(b -> (b.getBaseAsset().equals("BNB") || b.getQuoteAsset().equals("BNB")))
+        .filter(b -> (binanceExchangeInfo.getSymbol(b).getBaseAsset().equals("BNB") ||
+                binanceExchangeInfo.getSymbol(b).getQuoteAsset().equals("BNB")))
         .forEach(a -> {
-             log.info("Base: {} Quote: {} Lot Size: {} Min Notional: {}", a.getBaseAsset(), a.getQuoteAsset(), a.getLotSize().toString(), a.getMinNotionalValue() );
+             log.info("Base: {} Quote: {} Lot Size: {} Min Notional: {}",
+                     binanceExchangeInfo.getSymbol(a).getBaseAsset(),
+                     binanceExchangeInfo.getSymbol(a).getQuoteAsset(),
+                     binanceExchangeInfo.getSymbol(a).getLotSize().toString(),
+                     binanceExchangeInfo.getSymbol(a).getMinNotionalValue() );
         });
     }
 }

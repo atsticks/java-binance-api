@@ -16,8 +16,7 @@ import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /*
 {"timezone":"UTC","serverTime":1515514334979,
@@ -36,15 +35,12 @@ public class BinanceExchangeInfo {
     Long serverTime = 0L;
     List<BinanceRateLimit> rateLimits = new LinkedList<>();
     List<JsonObject> exchangeFilters = new LinkedList<>(); // missing proper documentation on that yet
-    List<BinanceExchangeSymbol> symbols = new LinkedList<>();
+    Map<String,BinanceExchangeSymbol> symbols = new HashMap<>();
 
     public BinanceExchangeInfo(JsonObject obj) throws BinanceApiException {
-        if (obj.has("timezone")) {
-            timezone = obj.get("timezone").getAsString();
-        }
-        if (obj.has("serverTime")) {
-            serverTime = obj.get("serverTime").getAsLong();
-        }
+        timezone = obj.get("timezone").getAsString();
+        serverTime = obj.get("serverTime").getAsLong();
+
         if (obj.has("rateLimits") && obj.get("rateLimits").isJsonArray()) {
             JsonArray arrRateLimits = obj.get("rateLimits").getAsJsonArray();
             rateLimits.clear();
@@ -70,8 +66,16 @@ public class BinanceExchangeInfo {
                 if (sym.equals("123456")) continue; // some special symbol that doesn't fit
 
                 BinanceExchangeSymbol symbol = new BinanceExchangeSymbol(jsonObject);
-                symbols.add(symbol);
+                symbols.put(symbol.getSymbol(), symbol);
             }
         }
+    }
+
+    public BinanceExchangeSymbol getSymbol(String symbol){
+        return this.symbols.get(symbol);
+    }
+
+    public Set<String> getSymbols(){
+        return this.symbols.keySet();
     }
 }

@@ -24,18 +24,18 @@ total number required, 0 for not required and 1 for required; default not requir
 
      */
 @Data
-@RequiredArgsConstructor
+@Builder
 public class BinanceOpenOrderRequest {
     /** the owner address. */
-    private String address;
+    String address;
     /** limit, default 500; max 1000.*/
-    private Integer limit = 500;
+    Integer limit = 500;
     /** offset, start with 0; default 0.*/
-    private Integer offset = 0;
+    Integer offset = 0;
     /** The symbol. */
-    private BinanceSymbol symbol;
+    BinanceSymbol symbol;
     /** total number required, 0 for not required and 1 for required; default not required, return total=-1 in response. */
-    private boolean total;
+    boolean total;
 
     public String toQueryString(){
         String result = "";

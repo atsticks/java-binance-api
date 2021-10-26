@@ -22,6 +22,7 @@ public class BinanceRateLimit {
 
     String rateLimitType;
     String interval;
+    Integer intervalNum;
     Long limit;
 
     public BinanceRateLimit(JsonObject obj) {
@@ -30,6 +31,9 @@ public class BinanceRateLimit {
         }
         if (obj.has("interval") && obj.get("interval").isJsonPrimitive()) {
             interval = obj.get("interval").getAsString();
+        }
+        if (obj.has("intervalNum") && obj.get("intervalNum").isJsonPrimitive()) {
+            intervalNum = obj.get("intervalNum").getAsInt();
         }
         if (obj.has("limit") && obj.get("limit").isJsonPrimitive()) {
             limit = obj.get("limit").getAsLong();

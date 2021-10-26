@@ -28,15 +28,14 @@ import lombok.Data;
 @Data
 public class BinanceAggregatedTrades {
 
-    //
-    public long a;
-    public Double p;
-    public Double q;
-    public long f;
-    public long l;
-    public long T;
-    public boolean m;
-    public boolean M;
+    long a;
+    Double p;
+    Double q;
+    long f;
+    long l;
+    long T;
+    boolean m;
+    boolean M;
 
     public long getTradeId() { return a; }
     public Double getPrice() { return p; }
