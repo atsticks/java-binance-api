@@ -316,7 +316,8 @@ public class BinanceApi {
         String u = baseUrl + "v3/klines" +request.toQueryString();
         JsonArray jsonElements = new BinanceRequest(u).read().asJsonArray();
         List<BinanceCandlestick> list = new LinkedList<>();
-        for (JsonElement e : jsonElements) list.add(new BinanceCandlestick(e.getAsJsonArray()));
+        for (JsonElement e : jsonElements) list.add(new BinanceCandlestick(request.getSymbol().toString())
+                .read(e.getAsJsonArray()));
         return list;
     }
 
