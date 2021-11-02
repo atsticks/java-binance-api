@@ -43,20 +43,20 @@ public class BinanceApi {
     /**
      * API Base URL
      */
-    public String baseUrl = "https://www.binance.com/api/";
+    public String baseUrl = "https://api.binance.com/api/";
 
     /**
      * API Base URL
      */
-    public String baseTestUrl = "https://testnet-dex.binance.com/api/";
+    public String baseTestUrl = "https://testnet.binance.vision/api/";
     /**
      * Old W-API Base URL. Might not function well at that moment, please use modern wapi3 API instead
      */
-    public String baseWapiUrl = "https://www.binance.com/wapi/";
+    public String baseWapiUrl = "https://api.binance.com/wapi/";
     /**
      * Old W-API Base URL. Might not function well at that moment, please use modern wapi3 API instead
      */
-    public String baseSapiUrl = "https://www.binance.com/sapi/";
+    public String baseSapiUrl = "https://api.binance.com/sapi/";
     /**
      * W-API3 Base URL.
      */
@@ -235,13 +235,16 @@ public class BinanceApi {
     /**
      * Get the current available trading pairs.
      *
-     * @param limit numeric limit of results, default 500; max 1000.
-     * @param offset start with 0; default 0.
+     * @param recvWindow the recvWindow
      * @return result in JSON
      * @throws BinanceApiException in case of any error
      */
-    public List<BinancePair> getPairs(int limit, int offset) throws BinanceApiException {
-        JsonArray arr = new BinanceRequest(baseUrl + "v1/markets?limit=" + limit + "&offset=" + limit)
+    public List<BinancePair> getIsolatedPairs(Integer recvWindow) throws BinanceApiException {
+        String url = baseSapiUrl + "v1/margin/isolated/allPairs";
+        if(recvWindow!=null){
+            url += "?recvWindow="+recvWindow;
+        }
+        JsonArray arr = new BinanceRequest(url).sign(apiKey, secretKey, null)
                 .read().asJsonArray();
         List<BinancePair> pairs = new ArrayList<>();
         arr.forEach(p -> {
@@ -251,24 +254,30 @@ public class BinanceApi {
     }
 
     /**
-     * Get the current available trading pairs.
-     *
-     * @param limit numeric limit of results, default 500; max 1000.
-     * @return result in JSON
-     * @throws BinanceApiException in case of any error
-     */
-    public List<BinancePair> getPairs(int limit) throws BinanceApiException {
-        return getPairs(limit, 0);
-    }
-
-    /**
      * Get the current available trading pairs, with a limit of 500 and offset 0.
      *
      * @return result in JSON
      * @throws BinanceApiException in case of any error
      */
-    public List<BinancePair> getPairs() throws BinanceApiException {
-        return getPairs(500, 0);
+    public List<BinancePair> getIsolatedPairs() throws BinanceApiException {
+        return getIsolatedPairs(null);
+    }
+
+    /**
+     * Get the current available trading pairs.
+     *
+     * @return result in JSON
+     * @throws BinanceApiException in case of any error
+     */
+    public List<BinancePair> getCrossMargingPairs() throws BinanceApiException {
+        JsonArray arr = new BinanceRequest( baseSapiUrl + "v1/margin/allPairs" )
+                .sign(apiKey, secretKey, null)
+                .read().asJsonArray();
+        List<BinancePair> pairs = new ArrayList<>();
+        arr.forEach(p -> {
+            pairs.add(new BinancePair(p.getAsJsonObject()));
+        });
+        return pairs;
     }
 
     /**
@@ -368,6 +377,7 @@ public class BinanceApi {
     /**
      * Get latest price for a symbol.
      *
+     * @param symbol the symbol, not null.
      * @return last price.
      * @throws BinanceApiException  in case of any error
      */
@@ -423,6 +433,7 @@ public class BinanceApi {
     /**
      * Get best price/qty on the order book for all symbols.
      *
+     * @param symbol the symbol, not null.
      * @return map of BinanceTicker
      * @throws BinanceApiException in case of any error
      */
@@ -466,48 +477,24 @@ public class BinanceApi {
      * Window: Default query window is latest 7 days; The maximum start - end query window is
      * 3 months. Rate Limit: 5 requests per IP per second.
      * @param symbol the symbol, required.
-     * @param timestamp the target timestamp, required.
      * @return the fee, or null.
      * @throws BinanceApiException in case of any error
      */
-    public BinanceTradeFee getTradeFee(BinanceSymbol symbol, long timestamp) throws BinanceApiException {
-//        JsonArray arr = new BinanceRequest(baseSapiUrl + "v1/asset/tradeFee?symbol="+symbol+"&timestamp="+timestamp)
-//                .sign(apiKey, secretKey, null).read().asJsonArray();
-        JsonArray arr = new BinanceRequest(baseSapiUrl + "v1/fees?symbol="+symbol+"&timestamp="+timestamp)
+    public BinanceTradeFee getTradeFee(BinanceSymbol symbol, Integer recvWindow) throws BinanceApiException {
+        String url = baseSapiUrl + "v1/asset/tradeFee?symbol="+symbol;
+        if(recvWindow!=null){
+            url += "&recvWindow="+recvWindow;
+        }
+        JsonArray arr = new BinanceRequest(url)
                 .sign(apiKey, secretKey, null).read().asJsonArray();
         for (JsonElement tr : arr) {
             BinanceTradeFee fee = new BinanceTradeFee();
-            fee.setTimestamp(timestamp);
+            fee.setTimestamp(System.currentTimeMillis());
             fee.setMakerCommission(tr.getAsJsonObject().get("makerCommission").getAsDouble());
             fee.setTakerCommission(tr.getAsJsonObject().get("takerCommission").getAsDouble());
             return fee;
         }
         return null;
-    }
-
-    /**
-     * Get historical trading fees of the address, including fees of trade/canceled order/expired order.
-     * Transfer and other transaction fees are not included. Order by block height DESC. Query
-     * Window: Default query window is latest 7 days; The maximum start - end query window is
-     * 3 months. Rate Limit: 5 requests per IP per second.
-     * @param timestamp the target timestamp, required.
-     * @return JsonObject
-     * @throws BinanceApiException in case of any error
-     */
-    public List<BinanceTradeFee> getTradeFees(long timestamp) throws BinanceApiException {
-//        JsonArray arr = new BinanceRequest(baseSapiUrl + "v1/asset/tradeFee?timestamp="+timestamp)
-//                .sign(apiKey, secretKey, null).read().asJsonArray();
-        JsonArray arr = new BinanceRequest(baseSapiUrl + "v1/fees?timestamp="+timestamp)
-                .sign(apiKey, secretKey, null).read().asJsonArray();
-        List<BinanceTradeFee> fees = new ArrayList<>();
-        for (JsonElement tr : arr) {
-            BinanceTradeFee fee = new BinanceTradeFee();
-            fee.setTimestamp(timestamp);
-            fee.setMakerCommission(tr.getAsJsonObject().get("makerCommission").getAsDouble());
-            fee.setTakerCommission(tr.getAsJsonObject().get("takerCommission").getAsDouble());
-            fees.add(fee);
-        }
-        return fees;
     }
 
 //    /**
@@ -670,6 +657,7 @@ public class BinanceApi {
     /**
      * Get all my orders.
      *
+     * @param request the request, not null.
      * @return List of Orders
      * @throws BinanceApiException in case of any error
      */
@@ -748,7 +736,8 @@ public class BinanceApi {
      */
     public List<BinanceTrade> getTrades(BinanceSymbol symbol, int limit) throws BinanceApiException {
         String u = baseUrl + "v3/trades?symbol=" + symbol + "&limit=" + limit;
-        String lastResponse = new BinanceRequest(u).sign(apiKey, secretKey, null).read().getLastResponse();
+        // sign(apiKey, secretKey, null)
+        String lastResponse = new BinanceRequest(u).read().getLastResponse();
         Type listType = new TypeToken<List<BinanceTrade>>() {}.getType();
         return new Gson().fromJson(lastResponse, listType);
     }
@@ -969,6 +958,7 @@ public class BinanceApi {
      *
      * @param request the fiat order request, not null.
      * @throws BinanceApiException in case of any error
+     * @return a list of Fiat orders.
      */
     public List<BinanceFiatOrder> getFiatOrders(BinanceFiatOrderRequest request) throws BinanceApiException {
         JsonObject ob = new BinanceRequest(baseSapiUrl + "v1/fiat/orders"+request.toQueryString())
@@ -986,6 +976,7 @@ public class BinanceApi {
      *
      * @param request the fiat order request, not null.
      * @throws BinanceApiException in case of any error
+     * @return list of fiat payments.
      */
     public List<BinanceFiatPayment> getFiatPayments(BinanceFiatOrderRequest request) throws BinanceApiException {
         JsonObject ob = new BinanceRequest(baseSapiUrl + "v1/fiat/payments"+request.toQueryString())
@@ -1125,10 +1116,9 @@ public class BinanceApi {
      * @throws BinanceApiException in case of any error
      */
     public List<BinanceWithdrawTransaction> getWithdrawHistory(BinanceHistoryFilter historyFilter) throws BinanceApiException {
-        String q = historyFilter.getAsQuery();
-        String u = baseSapiUrl + "/v1/capital/withdraw/history" + (Strings.isNullOrEmpty(q) ? "": ("?" + q));
+        String u = baseSapiUrl + "v1/capital/withdraw/history" + historyFilter.getAsQuery();
         List<BinanceWithdrawTransaction> result = new ArrayList<>();
-        JsonArray array = new BinanceRequest(u).sign(apiKey).post().read().asJsonArray();
+        JsonArray array = new BinanceRequest(u).sign(apiKey).read().asJsonArray();
         array.forEach(el -> {
             JsonObject ob = el.getAsJsonObject();
             BinanceWithdrawTransaction tx = new BinanceWithdrawTransaction();
@@ -1159,10 +1149,9 @@ public class BinanceApi {
      * @throws BinanceApiException in case of any error
      */
     public List<BinanceDepositTransaction> getDepositHistory(BinanceHistoryFilter historyFilter) throws BinanceApiException {
-        String q = historyFilter.getAsQuery();
-        String u = baseSapiUrl + "v1/capital/deposit/hisrec" + (Strings.isNullOrEmpty(q) ? "": ("?" + q));
+        String u = baseSapiUrl + "v1/capital/deposit/hisrec" + historyFilter.getAsQuery();
         List<BinanceDepositTransaction> result = new ArrayList<>();
-        JsonArray array = new BinanceRequest(u).sign(apiKey).post().read().asJsonArray();
+        JsonArray array = new BinanceRequest(u).sign(apiKey).read().asJsonArray();
         array.forEach(el -> {
             JsonObject ob = el.getAsJsonObject();
             BinanceDepositTransaction tx = new BinanceDepositTransaction();
@@ -1188,7 +1177,7 @@ public class BinanceApi {
     * @throws BinanceApiException in case of any error
     */
     public BinanceSystemStatus getSystemStatus() throws BinanceApiException {
-        String u = baseUrl + "/sapi/v1/system/status";
+        String u = baseSapiUrl + "v1/system/status";
         JsonObject ob = new BinanceRequest(u).read().asJsonObject();
         BinanceSystemStatus status = new BinanceSystemStatus();
         status.setStatus(ob.get("status").getAsInt());

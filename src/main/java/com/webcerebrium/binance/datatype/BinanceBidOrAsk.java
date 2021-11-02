@@ -23,7 +23,12 @@ public class BinanceBidOrAsk {
 
     public BinanceBidOrAsk(BinanceBidType type, JsonArray arr) {
         this.type = type;
-        this.price = arr.get(0).getAsDouble();
-        this.quantity = arr.get(1).getAsDouble();
+        try {
+            this.price = arr.get(0).getAsDouble();
+            this.quantity = arr.get(1).getAsDouble();
+        }catch(Exception e){
+            e.printStackTrace();
+            System.err.println(arr);
+        }
     }
 }

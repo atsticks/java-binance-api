@@ -17,7 +17,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.math.BigDecimal;
+import java.util.List;
+
+import static org.junit.Assert.assertNotNull;
 
 @Slf4j
 public class TradingTest {
@@ -30,7 +32,7 @@ public class TradingTest {
     private BinanceAsset walletAsset = null;
 
     @Before
-    public void setUp() throws Exception, BinanceApiException {
+    public void setUp() throws BinanceApiException {
         binanceApi = new BinanceApi();
         asset = "BNB";
         symbol = BinanceSymbol.valueOf(asset + "BTC");
@@ -55,7 +57,35 @@ public class TradingTest {
     }
 
     @Test
-    public void testOrderWithoutPlacing() throws Exception, BinanceApiException {
+    public void testGetTradeFee() throws BinanceApiException {
+        BinanceTradeFee tradeFee = binanceApi.getTradeFee(BinanceSymbol.valueOf("BTCUSDT"), null);
+        assertNotNull(tradeFee);
+        log.info("Trade Fee = {}", tradeFee);
+    }
+
+    @Test
+    public void testGetIsolatedPairs() throws BinanceApiException {
+        List<BinancePair> pairs = binanceApi.getIsolatedPairs();
+        assertNotNull(pairs);
+        log.info("Isolated trade pairs = {}", pairs);
+    }
+
+    @Test
+    public void testGetIsolatedPairsWithWindow1000() throws BinanceApiException {
+        List<BinancePair> pairs = binanceApi.getIsolatedPairs(1000);
+        assertNotNull(pairs);
+        log.info("Isolated trade pairs = {}", pairs);
+    }
+
+    @Test
+    public void testGetCrossMarginPairs() throws BinanceApiException {
+        List<BinancePair> pairs = binanceApi.getCrossMargingPairs();
+        assertNotNull(pairs);
+        log.info("Cross Margin trade pairs = {}", pairs);
+    }
+
+    @Test
+    public void testOrderWithoutPlacing() throws BinanceApiException {
         if (canTrade) {
             BinanceOrderPlacement placement = new BinanceOrderPlacement(symbol, BinanceOrderSide.SELL);
             placement.setTimeInForce(BinanceTimeInForce.GOOD_TILL_CANCELLED);
@@ -70,7 +100,7 @@ public class TradingTest {
     }
 
     @Test
-    public void testMarketOrder() throws Exception, BinanceApiException {
+    public void testMarketOrder() throws BinanceApiException {
         if (canTrade) {
             // Testing Buying BNB with BTC - using market price
             BinanceOrderPlacement placement = new BinanceOrderPlacement(symbol, BinanceOrderSide.BUY);
@@ -96,7 +126,9 @@ public class TradingTest {
                 placement.setQuantity(qty); // sell some of our asset for 1 BTC each
                 BinanceNewOrder jsonObject = binanceApi.createOrder(placement);
                 log.info("Order Placement = {}", jsonObject.toString());
-                order = binanceApi.getOrderById(symbol, jsonObject.getOrderId());
+                order = binanceApi.getOrder(BinanceOrderRequest.builder()
+                        .orderId(jsonObject.getOrderId())
+                        .symbol(symbol).build());
                 System.out.println(order);
             }
         }

@@ -188,7 +188,7 @@ public class BinanceExchangeSymbol {
     public Double getMinNotionalValue() {
         if (filters.containsKey("MIN_NOTIONAL")) {
             BinanceExchangeFilter obj = this.getMinNotional();
-            return obj.getDouble("MIN_NOTIONAL");
+            return obj.getDouble("minNotional");
         }
         return 0d;
     }

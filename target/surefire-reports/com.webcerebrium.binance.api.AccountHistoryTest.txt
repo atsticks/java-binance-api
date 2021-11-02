@@ -1,12 +1,12 @@
 -------------------------------------------------------------------------------
 Test set: com.webcerebrium.binance.api.AccountHistoryTest
 -------------------------------------------------------------------------------
-Tests run: 2, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.404 sec <<< FAILURE!
+Tests run: 2, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.354 sec <<< FAILURE!
 testAccountWithdrawalHistory(com.webcerebrium.binance.api.AccountHistoryTest)  Time elapsed: 0 sec  <<< ERROR!
 com.webcerebrium.binance.api.BinanceApiException: Missing BINANCE_API_KEY. Please check environment variables or VM options
 	at com.webcerebrium.binance.api.BinanceRequest.sign(BinanceRequest.java:130)
-	at com.webcerebrium.binance.api.BinanceApi.getWithdrawHistory(BinanceApi.java:772)
-	at com.webcerebrium.binance.api.AccountHistoryTest.testAccountWithdrawalHistory(AccountHistoryTest.java:33)
+	at com.webcerebrium.binance.api.BinanceApi.getWithdrawHistory(BinanceApi.java:1121)
+	at com.webcerebrium.binance.api.AccountHistoryTest.testAccountWithdrawalHistory(AccountHistoryTest.java:35)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -31,8 +31,8 @@ com.webcerebrium.binance.api.BinanceApiException: Missing BINANCE_API_KEY. Pleas
 testAccountDepositHistory(com.webcerebrium.binance.api.AccountHistoryTest)  Time elapsed: 0 sec  <<< ERROR!
 com.webcerebrium.binance.api.BinanceApiException: Missing BINANCE_API_KEY. Please check environment variables or VM options
 	at com.webcerebrium.binance.api.BinanceRequest.sign(BinanceRequest.java:130)
-	at com.webcerebrium.binance.api.BinanceApi.getDepositHistory(BinanceApi.java:787)
-	at com.webcerebrium.binance.api.AccountHistoryTest.testAccountDepositHistory(AccountHistoryTest.java:26)
+	at com.webcerebrium.binance.api.BinanceApi.getDepositHistory(BinanceApi.java:1154)
+	at com.webcerebrium.binance.api.AccountHistoryTest.testAccountDepositHistory(AccountHistoryTest.java:28)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)

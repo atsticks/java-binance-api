@@ -19,17 +19,19 @@ public class AccountHistoryTest {
 
     @Test
     public void testAccountDepositHistory() throws Exception, BinanceApiException {
-        BinanceHistoryFilter historyFilter = new BinanceHistoryFilter("ETH");
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MONTH, -3);
-        historyFilter.setStartTime(cal.getTime());
-        log.info("DEPOSIT={}", binanceApi.getDepositHistory(historyFilter));
+        BinanceHistoryFilter historyFilter = BinanceHistoryFilter.builder()
+                .coin("ETH")
+                .startTime(cal.getTime().getTime()).build();
 
+        log.info("DEPOSIT={}", binanceApi.getDepositHistory(historyFilter));
     }
 
     @Test
     public void testAccountWithdrawalHistory() throws Exception, BinanceApiException {
-        BinanceHistoryFilter historyFilter = new BinanceHistoryFilter();
+        BinanceHistoryFilter historyFilter = BinanceHistoryFilter.builder()
+                .coin("ETH").build();
         log.info("WITHDRAWALS={}", binanceApi.getWithdrawHistory(historyFilter));
     }
 }

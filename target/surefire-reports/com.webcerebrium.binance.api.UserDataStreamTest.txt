@@ -5,7 +5,7 @@ Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0 sec <<< FAILUR
 testUserDataStreamIsCreatedAndClosed(com.webcerebrium.binance.api.UserDataStreamTest)  Time elapsed: 0.002 sec  <<< ERROR!
 com.webcerebrium.binance.api.BinanceApiException: Missing BINANCE_API_KEY. Please check environment variables or VM options
 	at com.webcerebrium.binance.api.BinanceRequest.sign(BinanceRequest.java:130)
-	at com.webcerebrium.binance.api.BinanceApi.startUserDataStream(BinanceApi.java:609)
+	at com.webcerebrium.binance.api.BinanceApi.startUserDataStream(BinanceApi.java:860)
 	at com.webcerebrium.binance.api.UserDataStreamTest.testUserDataStreamIsCreatedAndClosed(UserDataStreamTest.java:31)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)

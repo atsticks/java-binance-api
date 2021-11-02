@@ -8,13 +8,10 @@ package com.webcerebrium.binance.api;
  * ============================================================ */
 
 import com.webcerebrium.binance.datatype.BinanceExchangeInfo;
-import com.webcerebrium.binance.datatype.BinanceExchangeStats;
-import com.webcerebrium.binance.datatype.BinanceExchangeSymbol;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -23,18 +20,18 @@ public class PublicMarketsTest {
     private BinanceApi binanceApi = null;
 
     @Before
-    public void setUp() throws Exception, BinanceApiException {
+    public void setUp() throws Exception {
         binanceApi = new BinanceApi();
     }
 
     @Test
-    public void testPublicMarkets() throws Exception, BinanceApiException {
-        BinanceExchangeStats binanceExchangeStats = binanceApi.getPublicExchangeStats();
+    public void testPublicMarkets() throws BinanceApiException {
+        BinanceExchangeInfo binanceExchangeStats = binanceApi.getExchangeInfo();
         log.info("Public Exchange Stats (not documented): {}", binanceExchangeStats.toString());
     }
 
     @Test
-    public void testExchangeInfo() throws Exception, BinanceApiException {
+    public void testExchangeInfo() throws BinanceApiException {
         BinanceExchangeInfo binanceExchangeInfo = binanceApi.getExchangeInfo();
         Set<String> symbols = binanceExchangeInfo.getSymbols();
         // BinanceExchangeSymbol BNB = symbols.stream().filter(a -> a.getQuoteAsset().equals("BNB")).findFirst().get();
@@ -43,12 +40,10 @@ public class PublicMarketsTest {
         .stream()
         .filter(b -> (binanceExchangeInfo.getSymbol(b).getBaseAsset().equals("BNB") ||
                 binanceExchangeInfo.getSymbol(b).getQuoteAsset().equals("BNB")))
-        .forEach(a -> {
-             log.info("Base: {} Quote: {} Lot Size: {} Min Notional: {}",
-                     binanceExchangeInfo.getSymbol(a).getBaseAsset(),
-                     binanceExchangeInfo.getSymbol(a).getQuoteAsset(),
-                     binanceExchangeInfo.getSymbol(a).getLotSize().toString(),
-                     binanceExchangeInfo.getSymbol(a).getMinNotionalValue() );
-        });
+        .forEach(a -> log.info("Base: {} Quote: {} Lot Size: {} Min Notional: {}",
+                binanceExchangeInfo.getSymbol(a).getBaseAsset(),
+                binanceExchangeInfo.getSymbol(a).getQuoteAsset(),
+                binanceExchangeInfo.getSymbol(a).getLotSize().toString(),
+                binanceExchangeInfo.getSymbol(a).getMinNotionalValue() ));
     }
 }

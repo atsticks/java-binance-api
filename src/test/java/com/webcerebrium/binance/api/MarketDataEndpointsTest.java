@@ -48,7 +48,10 @@ public class MarketDataEndpointsTest {
 
     @Test
     public void testAggTradesEndpoint() throws Exception, BinanceApiException {
-        List<BinanceAggregatedTrades> binanceAggregatedTrades = binanceApi.getAggregatedTrades(symbol, 5, null);
+        List<BinanceAggregatedTrades> binanceAggregatedTrades = binanceApi.getAggregatedTrades(
+                BinanceAggregatedTradesRequest.builder()
+                        .symbol(symbol)
+                        .limit(5).build());
 
         assertTrue("Aggregated trades array should be received", binanceAggregatedTrades.size() > 0);
         // check human-looking getters for the first picked trade
@@ -71,8 +74,11 @@ public class MarketDataEndpointsTest {
         cal.add(Calendar.MINUTE, -15);
         Long timeStart = cal.getTime().getTime();
 
-        Map<String, Long> options = ImmutableMap.of("startTime", timeStart, "endTime", timeEnd);
-        List<BinanceAggregatedTrades> binanceAggregatedTrades = binanceApi.getAggregatedTrades(symbol, 5, options);
+        List<BinanceAggregatedTrades> binanceAggregatedTrades = binanceApi.getAggregatedTrades(BinanceAggregatedTradesRequest.builder()
+                .symbol(symbol)
+                .limit(5)
+                .startTime(timeStart)
+                .endTime(timeEnd).build());
 
         assertTrue("Aggregated trades array should be received", binanceAggregatedTrades.size() > 0);
         // check human-looking getters for the first picked trade
@@ -96,7 +102,11 @@ public class MarketDataEndpointsTest {
     @Test
     public void testKlinesEndpoint() throws Exception, BinanceApiException {
         // checking intervals
-        List<BinanceCandlestick> klines = binanceApi.getCandlestickBars(symbol, BinanceInterval.FIFTEEN_MIN, 5, null);
+        List<BinanceCandlestick> klines = binanceApi.getCandlestickBars(
+                CandlestickBarRequest.builder()
+                        .symbol(symbol)
+                        .interval(BinanceInterval.FIFTEEN_MIN)
+                        .limit(5).build());
         assertTrue("Klines should return non-empty array of candlesticks", klines.size() > 0);
 
         BinanceCandlestick firstCandlestick = klines.get(0);
@@ -123,8 +133,13 @@ public class MarketDataEndpointsTest {
         cal.add(Calendar.DATE, -3);
         Long timeStart = cal.getTime().getTime();
 
-        Map<String, Long> options = ImmutableMap.of("startTime", timeStart, "endTime", timeEnd);
-        List<BinanceCandlestick> klines = binanceApi.getCandlestickBars(symbol, BinanceInterval.FIFTEEN_MIN, 50, options);
+        List<BinanceCandlestick> klines = binanceApi.getCandlestickBars(
+                CandlestickBarRequest.builder()
+                        .symbol(symbol)
+                        .interval(BinanceInterval.FIFTEEN_MIN)
+                        .limit(50)
+                        .startTime(timeStart)
+                        .endTime(timeEnd).build());
         assertTrue("Klines should return non-empty array of candlesticks", klines.size() > 0);
 
         BinanceCandlestick firstCandlestick = klines.get(0);
@@ -163,13 +178,11 @@ public class MarketDataEndpointsTest {
 
     @Test
     public void testAllBookTickersEndpoint() throws Exception, BinanceApiException {
-        Map<String,BinanceTicker> mapTickers = binanceApi.getAllBookTickers();
+        List<BinanceTicker> mapTickers = binanceApi.getBookTickers();
         assertTrue("There should be some tickers", mapTickers.size() > 0);
-        assertTrue("There should be ticker for symbol", mapTickers.containsKey(symbol.toString()));
 
         String s = symbol.toString();
-        BinanceTicker binanceTicker = mapTickers.get(s);
-        assertTrue(s + " ticker should have symbol", binanceTicker.getSymbol().equals(s));
+        BinanceTicker binanceTicker = mapTickers.get(0);
         assertNotNull(s + " ticker should have bidQty", binanceTicker.getBidPrice());
         assertNotNull(s + " ticker should have askQty", binanceTicker.getAskPrice());
         assertNotNull(s + " ticker should have bidPrice", binanceTicker.getBidPrice());
