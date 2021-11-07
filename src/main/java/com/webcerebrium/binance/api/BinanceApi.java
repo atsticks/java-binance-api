@@ -9,7 +9,6 @@ package com.webcerebrium.binance.api;
  * ============================================================ */
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;
 import com.google.gson.Gson;
@@ -39,6 +38,7 @@ public class BinanceApi {
     /* Actual API key and Secret Key that will be used */
     public String apiKey;
     public String secretKey;
+    public Integer connectionTimeoutSeconds;
 
     /**
      * API Base URL
@@ -116,6 +116,7 @@ public class BinanceApi {
     public boolean ping() {
         try {
             new BinanceRequest(baseUrl + "v1/ping")
+                    .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .read().asJsonObject();
             return true;
         }catch(BinanceApiException e){
@@ -131,6 +132,7 @@ public class BinanceApi {
      */
     public Long getServerTime() throws BinanceApiException {
         return (new BinanceRequest(baseUrl + "v1/time"))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .read().asJsonObject().get("serverTime").getAsLong();
     }
 
@@ -155,6 +157,7 @@ public class BinanceApi {
      */
     public BinanceNodeInfo getNodeInfo() throws BinanceApiException {
         JsonObject ob = new BinanceRequest(baseUrl + "v1/node-info")
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .read().asJsonObject();
         JsonObject node_info = ob.get("node_info").getAsJsonObject();
         JsonObject sync_info = ob.get("sync_info").getAsJsonObject();
@@ -173,6 +176,7 @@ public class BinanceApi {
      */
     public List<BinancePeer> getPeers() throws BinanceApiException {
         JsonArray arr = new BinanceRequest(baseUrl + "v1/peers")
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .read().asJsonArray();
         List<BinancePeer> peers = new ArrayList<>();
         for (JsonElement p : arr) {
@@ -204,6 +208,7 @@ public class BinanceApi {
      */
     public BinanceDepth getDepth(BinanceSymbol symbol) throws BinanceApiException {
         JsonObject ob = new BinanceRequest(baseUrl + "v1/depth?symbol=" + symbol.getSymbol())
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .read().asJsonObject();
         JsonArray asks = ob.get("asks").getAsJsonArray();
         JsonArray bids = ob.get("bids").getAsJsonArray();
@@ -223,6 +228,7 @@ public class BinanceApi {
      */
     public BinanceDepth getDepth(BinanceSymbol symbol, int limit) throws BinanceApiException {
         JsonObject ob = new BinanceRequest(baseUrl + "v1/depth?symbol=" + symbol.getSymbol() + "&limit=" + limit)
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .read().asJsonObject();
         JsonArray asks = ob.get("asks").getAsJsonArray();
         JsonArray bids = ob.get("bids").getAsJsonArray();
@@ -271,6 +277,7 @@ public class BinanceApi {
      */
     public List<BinancePair> getCrossMargingPairs() throws BinanceApiException {
         JsonArray arr = new BinanceRequest( baseSapiUrl + "v1/margin/allPairs" )
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .sign(apiKey, secretKey, null)
                 .read().asJsonArray();
         List<BinancePair> pairs = new ArrayList<>();
@@ -289,7 +296,8 @@ public class BinanceApi {
      */
     public List<BinanceHistoricalTrade> getHistoricalTrades(BinanceHistoricalTradesRequest request) throws BinanceApiException {
         String u = baseUrl + "v3/historicalTrades" + request.toQueryString();
-        String lastResponse = new BinanceRequest(u).read().getLastResponse();
+        String lastResponse = new BinanceRequest(u)
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).read().getLastResponse();
         Type listType = new TypeToken<List<BinanceHistoricalTrade>>() {
         }.getType();
         return new Gson().fromJson(lastResponse, listType);
@@ -308,7 +316,8 @@ public class BinanceApi {
      */
     public List<BinanceAggregatedTrades> getAggregatedTrades(BinanceAggregatedTradesRequest request) throws BinanceApiException {
         String u = baseUrl + "v3/aggTrades" + request.toQueryString();
-        String lastResponse = new BinanceRequest(u).read().getLastResponse();
+        String lastResponse = new BinanceRequest(u)
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).read().getLastResponse();
         Type listType = new TypeToken<List<BinanceAggregatedTrades>>() {
         }.getType();
         return new Gson().fromJson(lastResponse, listType);
@@ -323,7 +332,7 @@ public class BinanceApi {
      */
     public List<BinanceCandlestick> getCandlestickBars(CandlestickBarRequest request) throws BinanceApiException {
         String u = baseUrl + "v3/klines" +request.toQueryString();
-        JsonArray jsonElements = new BinanceRequest(u).read().asJsonArray();
+        JsonArray jsonElements = new BinanceRequest(u).connectionTimeoutSeconds(connectionTimeoutSeconds).read().asJsonArray();
         List<BinanceCandlestick> list = new LinkedList<>();
         for (JsonElement e : jsonElements) list.add(new BinanceCandlestick(request.getSymbol().toString())
                 .read(e.getAsJsonArray()));
@@ -337,6 +346,7 @@ public class BinanceApi {
      */
     public BinanceExchangeInfo getExchangeInfo() throws BinanceApiException {
         JsonObject jsonObject = (new BinanceRequest(baseUrl + "v3/exchangeInfo"))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .read().asJsonObject();
         return new BinanceExchangeInfo(jsonObject);
     }
@@ -349,6 +359,7 @@ public class BinanceApi {
     public List<BinanceTicker24> get24HrPriceStatistics() throws BinanceApiException {
         List<BinanceTicker24> result = new ArrayList<>();
         JsonArray data = new BinanceRequest(baseUrl + "v1/ticker/24hr" )
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .read().asJsonArray();
         data.forEach(d -> {
             BinanceTicker24 ticker = new BinanceTicker24();
@@ -369,6 +380,7 @@ public class BinanceApi {
         BinanceTicker24 ticker = new BinanceTicker24();
         ticker.setSymbol(symbol.getSymbol());
         ticker.read (new BinanceRequest(baseUrl + "v1/ticker/24hr?symbol=" + symbol.toString())
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .read().asJsonObject());
         return ticker;
     }
@@ -396,6 +408,7 @@ public class BinanceApi {
     public Map<String, Double> getPrices() throws BinanceApiException {
         Map<String, Double> map = new ConcurrentHashMap<>();
         JsonArray array = (new BinanceRequest(baseUrl + "v3/ticker/price"))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .read().asJsonArray();
         for (JsonElement elem : array) {
             JsonObject obj = elem.getAsJsonObject();
@@ -411,6 +424,7 @@ public class BinanceApi {
      */
     public BinanceAveragePrice getAveragePrice(BinanceSymbol symbol) throws BinanceApiException {
         JsonObject ob = new BinanceRequest(baseUrl + "v3/avgPrice?symbol="+symbol)
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .read().asJsonObject();
         BinanceAveragePrice price = new BinanceAveragePrice(symbol.getSymbol());
         price.read(ob);
@@ -424,7 +438,8 @@ public class BinanceApi {
      * @throws BinanceApiException in case of any error
      */
     public List<BinanceTicker> getBookTickers() throws BinanceApiException {
-        String lastResponse = (new BinanceRequest(baseUrl + "v3/ticker/bookTicker")).read().getLastResponse();
+        String lastResponse = (new BinanceRequest(baseUrl + "v3/ticker/bookTicker"))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).read().getLastResponse();
         Type listType = new TypeToken<List<BinanceTicker>>() {
         }.getType();
         return new Gson().fromJson(lastResponse, listType);
@@ -438,7 +453,8 @@ public class BinanceApi {
      * @throws BinanceApiException in case of any error
      */
     public BinanceTicker getBookTicker(BinanceSymbol symbol) throws BinanceApiException {
-        JsonObject ob = new BinanceRequest(baseUrl + "v3/ticker/bookTicker?symbol="+symbol).read().asJsonObject();
+        JsonObject ob = new BinanceRequest(baseUrl + "v3/ticker/bookTicker?symbol="+symbol)
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).read().asJsonObject();
         BinanceTicker ticker = new BinanceTicker();
         ticker.read(ob);
         return ticker;
@@ -456,6 +472,7 @@ public class BinanceApi {
     public BinanceAccount getAccount() throws BinanceApiException {
         BinanceAccount account = new BinanceAccount();
         account.read (new BinanceRequest(baseUrl + "v3/account")
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .sign(apiKey, secretKey, null).read().asJsonObject());
         return account;
     }
@@ -480,12 +497,27 @@ public class BinanceApi {
      * @return the fee, or null.
      * @throws BinanceApiException in case of any error
      */
+    public BinanceTradeFee getTradeFee(BinanceSymbol symbol) throws BinanceApiException {
+        return getTradeFee(symbol, null);
+    }
+
+    /**
+     * Get historical trading fees of the address, including fees of trade/canceled order/expired order.
+     * Transfer and other transaction fees are not included. Order by block height DESC. Query
+     * Window: Default query window is latest 7 days; The maximum start - end query window is
+     * 3 months. Rate Limit: 5 requests per IP per second.
+     * @param symbol the symbol, required.
+     * @param recvWindow revn window size, optional.
+     * @return the fee, or null.
+     * @throws BinanceApiException in case of any error
+     */
     public BinanceTradeFee getTradeFee(BinanceSymbol symbol, Integer recvWindow) throws BinanceApiException {
         String url = baseSapiUrl + "v1/asset/tradeFee?symbol="+symbol;
         if(recvWindow!=null){
             url += "&recvWindow="+recvWindow;
         }
         JsonArray arr = new BinanceRequest(url)
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .sign(apiKey, secretKey, null).read().asJsonArray();
         for (JsonElement tr : arr) {
             BinanceTradeFee fee = new BinanceTradeFee();
@@ -620,7 +652,8 @@ public class BinanceApi {
 	 */
 	public List<BinanceOrder> getOpenOrders() throws BinanceApiException {
 		String u = baseUrl + "v3/openOrders";
-		String lastResponse = (new BinanceRequest(u)).sign(apiKey, secretKey, null).read().getLastResponse();
+		String lastResponse = (new BinanceRequest(u))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).read().getLastResponse();
 		Type listType = new TypeToken<List<BinanceOrder>>() {
 		}.getType();
 		return new Gson().fromJson(lastResponse, listType);
@@ -634,7 +667,8 @@ public class BinanceApi {
      */
     public List<BinanceOrder> getOpenOrders(BinanceOpenOrderRequest request) throws BinanceApiException {
         String u = baseUrl + "v3/openOrders" + request.toQueryString();
-        String lastResponse = (new BinanceRequest(u)).sign(apiKey, secretKey, null).read().getLastResponse();
+        String lastResponse = (new BinanceRequest(u))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).read().getLastResponse();
         Type listType = new TypeToken<List<BinanceOrder>>() {
         }.getType();
         return new Gson().fromJson(lastResponse, listType);
@@ -648,7 +682,8 @@ public class BinanceApi {
      */
     public List<BinanceOrder> cancelOpenOrder(BinanceDeleteOrderRequest request) throws BinanceApiException {
         String u = baseUrl + "v3/openOrders" + request.toQueryString();
-        String lastResponse = (new BinanceRequest(u)).sign(apiKey, secretKey, null).delete().getLastResponse();
+        String lastResponse = (new BinanceRequest(u))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).delete().getLastResponse();
         Type listType = new TypeToken<List<BinanceOrder>>() {
         }.getType();
         return new Gson().fromJson(lastResponse, listType);
@@ -663,7 +698,8 @@ public class BinanceApi {
      */
     public List<BinanceOrder> getOrders(BinanceAllOrderRequest request) throws BinanceApiException {
         String u = baseUrl + "v3/allOrders"+request.toQueryString();
-        String lastResponse = (new BinanceRequest(u)).sign(apiKey, secretKey, null).read().getLastResponse();
+        String lastResponse = (new BinanceRequest(u))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).read().getLastResponse();
         Type listType = new TypeToken<List<BinanceOrder>>() {
         }.getType();
         return new Gson().fromJson(lastResponse, listType);
@@ -678,7 +714,8 @@ public class BinanceApi {
      */
     public List<BinanceOrder> geClosedOrders(BinanceClosedOrderRequest request) throws BinanceApiException {
         String u = baseUrl + "v3/closedOrders" + request.toQueryString();
-        String lastResponse = (new BinanceRequest(u)).sign(apiKey, secretKey, null).read().getLastResponse();
+        String lastResponse = (new BinanceRequest(u))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).read().getLastResponse();
         Type listType = new TypeToken<List<BinanceOrder>>() {
         }.getType();
         return new Gson().fromJson(lastResponse, listType);
@@ -697,7 +734,8 @@ public class BinanceApi {
         String u = baseUrl + "v3/allOrders?symbol=" + symbol.toString() + "&limit=" + limit;
         if (orderId != null && orderId > 0) u += "&orderId=" + orderId;
 
-        String lastResponse = (new BinanceRequest(u)).sign(apiKey, secretKey, null).read().getLastResponse();
+        String lastResponse = (new BinanceRequest(u))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).read().getLastResponse();
         Type listType = new TypeToken<List<BinanceOrder>>() {}.getType();
         return new Gson().fromJson(lastResponse, listType);
     }
@@ -721,7 +759,8 @@ public class BinanceApi {
      */
     public List<BinanceTrade> getMyTrades(BinanceMyTradesRequest request) throws BinanceApiException {
         String u = baseUrl + "v3/myTrades" + request.toQueryString();
-        String lastResponse = new BinanceRequest(u).sign(apiKey, secretKey, null).read().getLastResponse();
+        String lastResponse = new BinanceRequest(u)
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).read().getLastResponse();
         Type listType = new TypeToken<List<BinanceTrade>>() {}.getType();
         return new Gson().fromJson(lastResponse, listType);
     }
@@ -737,7 +776,7 @@ public class BinanceApi {
     public List<BinanceTrade> getTrades(BinanceSymbol symbol, int limit) throws BinanceApiException {
         String u = baseUrl + "v3/trades?symbol=" + symbol + "&limit=" + limit;
         // sign(apiKey, secretKey, null)
-        String lastResponse = new BinanceRequest(u).read().getLastResponse();
+        String lastResponse = new BinanceRequest(u).connectionTimeoutSeconds(connectionTimeoutSeconds).read().getLastResponse();
         Type listType = new TypeToken<List<BinanceTrade>>() {}.getType();
         return new Gson().fromJson(lastResponse, listType);
     }
@@ -762,7 +801,8 @@ public class BinanceApi {
      */
     public BinanceOrder getOrder(BinanceOrderRequest request) throws BinanceApiException {
         String u = baseUrl + "v3/order"+request.toQueryString();
-        String lastResponse = new BinanceRequest(u).sign(apiKey, secretKey, null).read().getLastResponse();
+        String lastResponse = new BinanceRequest(u)
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).read().getLastResponse();
         return (new Gson()).fromJson(lastResponse, BinanceOrder.class);
     }
 
@@ -777,7 +817,8 @@ public class BinanceApi {
      */
     public BinanceNewOrder createOrder(BinanceOrderPlacement orderPlacement)  throws BinanceApiException {
         String u = baseUrl + "v3/order?" + orderPlacement.getAsQuery();
-        String lastResponse = new BinanceRequest(u).sign(apiKey, secretKey, null).post().read().getLastResponse();
+        String lastResponse = new BinanceRequest(u)
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).post().read().getLastResponse();
         return (new Gson()).fromJson(lastResponse, BinanceNewOrder.class);
     }
 
@@ -788,7 +829,8 @@ public class BinanceApi {
      */
     public BinanceNewOrder testOrder(BinanceOrderPlacement orderPlacement)  throws BinanceApiException {
         String u = baseUrl + "v3/order/test?" + orderPlacement.getAsQuery();
-        String lastResponse = new BinanceRequest(u).sign(apiKey, secretKey, null).post().read().getLastResponse();
+        String lastResponse = new BinanceRequest(u)
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).post().read().getLastResponse();
         return (new Gson()).fromJson(lastResponse, BinanceNewOrder.class);
     }
 
@@ -801,7 +843,8 @@ public class BinanceApi {
      */
     public BinanceDeletedOrder deleteOrderById(BinanceSymbol symbol, Long orderId) throws BinanceApiException {
         String u = baseUrl + "v3/order?symbol=" + symbol.toString() + "&orderId=" + orderId;
-        JsonObject ob = (new BinanceRequest(u)).sign(apiKey, secretKey, null).delete().read().asJsonObject();
+        JsonObject ob = (new BinanceRequest(u))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).delete().read().asJsonObject();
         return new BinanceDeletedOrder(ob);
     }
     /**
@@ -813,7 +856,8 @@ public class BinanceApi {
      */
     public BinanceDeletedOrder deleteOrderByOrigClientId(BinanceSymbol symbol, String origClientOrderId) throws BinanceApiException {
         String u = baseUrl + "v3/order?symbol=" + symbol.toString() + "&origClientOrderId=" + esc.escape(origClientOrderId);
-        JsonObject ob = (new BinanceRequest(u)).sign(apiKey, secretKey, null).delete().read().asJsonObject();
+        JsonObject ob = (new BinanceRequest(u))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).delete().read().asJsonObject();
         return new BinanceDeletedOrder(ob);
     }
 
@@ -826,7 +870,8 @@ public class BinanceApi {
      */
     public BinanceDeletedOrder deleteOrderByNewClientId(BinanceSymbol symbol, String newClientOrderId ) throws BinanceApiException {
         String u = baseUrl + "v3/order?symbol=" + symbol.toString() + "&newClientOrderId=" + esc.escape(newClientOrderId);
-        JsonObject ob = (new BinanceRequest(u)).sign(apiKey, secretKey, null).delete().read().asJsonObject();
+        JsonObject ob = (new BinanceRequest(u))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).delete().read().asJsonObject();
         return new BinanceDeletedOrder(ob);
     }
 
@@ -857,6 +902,7 @@ public class BinanceApi {
      */
     public String startUserDataStream() throws BinanceApiException {
         JsonObject jsonObject = (new BinanceRequest(baseUrl + "v3/userDataStream"))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .sign(apiKey).post().read().asJsonObject();
         return jsonObject.get("listenKey").getAsString();
     }
@@ -868,6 +914,7 @@ public class BinanceApi {
      */
     public void keepUserDataStream(String listenKey) throws BinanceApiException{
         new BinanceRequest(baseUrl + "v3/userDataStream?listenKey=" + esc.escape(listenKey))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey).put().read().asJsonObject();
     }
 
@@ -878,6 +925,7 @@ public class BinanceApi {
      */
     public void deleteUserDataStream(String listenKey) throws BinanceApiException {
         new BinanceRequest(baseUrl + "v3/userDataStream?listenKey=" + esc.escape(listenKey))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .sign(apiKey).delete().read();
     }
 
@@ -892,6 +940,7 @@ public class BinanceApi {
      */
     public String startIsolatedMarginStream() throws BinanceApiException {
         JsonObject jsonObject = (new BinanceRequest(baseSapiUrl + "v1/userDataStream/isolated"))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .sign(apiKey).post().read().asJsonObject();
         return jsonObject.get("listenKey").getAsString();
     }
@@ -903,6 +952,7 @@ public class BinanceApi {
      */
     public void keepIsolatedMarginStream(String listenKey) throws BinanceApiException{
         new BinanceRequest(baseSapiUrl + "v1/userDataStream/isolated?listenKey=" + esc.escape(listenKey))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .sign(apiKey).put().read().asJsonObject();
     }
 
@@ -913,6 +963,7 @@ public class BinanceApi {
      */
     public void deleteIsolatedMarginStream(String listenKey) throws BinanceApiException {
         new BinanceRequest(baseSapiUrl + "v1/userDataStream/isolated?listenKey=" + esc.escape(listenKey))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .sign(apiKey).delete().read();
     }
 
@@ -925,6 +976,7 @@ public class BinanceApi {
      */
     public String startMarginStream() throws BinanceApiException {
         JsonObject jsonObject = (new BinanceRequest(baseSapiUrl + "v1/userDataStream"))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .sign(apiKey).post().read().asJsonObject();
         return jsonObject.get("listenKey").getAsString();
     }
@@ -936,6 +988,7 @@ public class BinanceApi {
      */
     public void keepMarginStream(String listenKey) throws BinanceApiException{
         new BinanceRequest(baseSapiUrl + "v1/userDataStream?listenKey=" + esc.escape(listenKey))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .sign(apiKey).put().read().asJsonObject();
     }
 
@@ -946,6 +999,7 @@ public class BinanceApi {
      */
     public void deleteMarginStream(String listenKey) throws BinanceApiException {
         new BinanceRequest(baseSapiUrl + "v1/userDataStream?listenKey=" + esc.escape(listenKey))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .sign(apiKey).delete().read();
     }
 
@@ -962,6 +1016,7 @@ public class BinanceApi {
      */
     public List<BinanceFiatOrder> getFiatOrders(BinanceFiatOrderRequest request) throws BinanceApiException {
         JsonObject ob = new BinanceRequest(baseSapiUrl + "v1/fiat/orders"+request.toQueryString())
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .sign(apiKey, secretKey, null).read().asJsonObject();
         if(ob.has("data")){
             JsonArray arr = ob.get("data").getAsJsonArray();
@@ -980,6 +1035,7 @@ public class BinanceApi {
      */
     public List<BinanceFiatPayment> getFiatPayments(BinanceFiatOrderRequest request) throws BinanceApiException {
         JsonObject ob = new BinanceRequest(baseSapiUrl + "v1/fiat/payments"+request.toQueryString())
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .sign(apiKey, secretKey, null).read().asJsonObject();
         if(ob.has("data")){
             JsonArray arr = ob.get("data").getAsJsonArray();
@@ -1103,6 +1159,7 @@ public class BinanceApi {
     public String withdraw(BinanceWithdrawOrder withdrawOrder) throws BinanceApiException {
         String u = baseSapiUrl + "/v1/capital/withdraw/apply" + withdrawOrder.toQueryString();
         return (new BinanceRequest(u))
+                .connectionTimeoutSeconds(connectionTimeoutSeconds)
                 .sign(apiKey).post().read().asJsonObject().get("id").getAsString();
     }
 
@@ -1118,7 +1175,8 @@ public class BinanceApi {
     public List<BinanceWithdrawTransaction> getWithdrawHistory(BinanceHistoryFilter historyFilter) throws BinanceApiException {
         String u = baseSapiUrl + "v1/capital/withdraw/history" + historyFilter.getAsQuery();
         List<BinanceWithdrawTransaction> result = new ArrayList<>();
-        JsonArray array = new BinanceRequest(u).sign(apiKey).read().asJsonArray();
+        JsonArray array = new BinanceRequest(u)
+                .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey).read().asJsonArray();
         array.forEach(el -> {
             JsonObject ob = el.getAsJsonObject();
             BinanceWithdrawTransaction tx = new BinanceWithdrawTransaction();
@@ -1151,7 +1209,8 @@ public class BinanceApi {
     public List<BinanceDepositTransaction> getDepositHistory(BinanceHistoryFilter historyFilter) throws BinanceApiException {
         String u = baseSapiUrl + "v1/capital/deposit/hisrec" + historyFilter.getAsQuery();
         List<BinanceDepositTransaction> result = new ArrayList<>();
-        JsonArray array = new BinanceRequest(u).sign(apiKey).read().asJsonArray();
+        JsonArray array = new BinanceRequest(u).connectionTimeoutSeconds(connectionTimeoutSeconds)
+                .sign(apiKey).read().asJsonArray();
         array.forEach(el -> {
             JsonObject ob = el.getAsJsonObject();
             BinanceDepositTransaction tx = new BinanceDepositTransaction();
@@ -1178,7 +1237,8 @@ public class BinanceApi {
     */
     public BinanceSystemStatus getSystemStatus() throws BinanceApiException {
         String u = baseSapiUrl + "v1/system/status";
-        JsonObject ob = new BinanceRequest(u).read().asJsonObject();
+        JsonObject ob = new BinanceRequest(u).connectionTimeoutSeconds(connectionTimeoutSeconds)
+                .read().asJsonObject();
         BinanceSystemStatus status = new BinanceSystemStatus();
         status.setStatus(ob.get("status").getAsInt());
         status.setMessage(ob.get("msg").getAsString());

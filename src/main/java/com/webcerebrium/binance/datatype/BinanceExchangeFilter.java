@@ -9,6 +9,8 @@ public class BinanceExchangeFilter {
     String filterType;
     JsonObject data;
 
+    public BinanceExchangeFilter(){}
+
     public BinanceExchangeFilter(JsonObject ob) {
         filterType = ob.get("filterType").getAsString();
         data = ob;

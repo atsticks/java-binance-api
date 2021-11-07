@@ -57,6 +57,8 @@ public class BinanceExchangeSymbol {
     Map<String, BinanceExchangeFilter> filters = new HashMap<>();
     List<String> permissions = new ArrayList<>();
 
+    public BinanceExchangeSymbol(){}
+
     public BinanceExchangeSymbol(JsonObject obj) throws BinanceApiException {
         symbol = obj.get("symbol").getAsString();
         status = obj.get("status").getAsString();

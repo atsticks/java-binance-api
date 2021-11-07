@@ -49,6 +49,7 @@ public class BinanceRequest {
     public String requestUrl = "";
     public String method = "GET";
     public String lastResponse = "";
+    public Integer connectionTimeoutSeconds;
 
     public String apiKey = "";
     public String secretKey = "";
@@ -216,6 +217,9 @@ public class BinanceRequest {
         for(String header: headers.keySet()) {
             conn.setRequestProperty(header, headers.get(header));
         }
+        if(connectionTimeoutSeconds!=null) {
+            conn.setConnectTimeout(connectionTimeoutSeconds);
+        }
         return this;
     }
 
@@ -289,4 +293,8 @@ public class BinanceRequest {
         return (JsonArray)jsonParser.parse(getLastResponse());
     }
 
+    public BinanceRequest connectionTimeoutSeconds(Integer seconds){
+        this.connectionTimeoutSeconds = seconds;
+        return this;
+    }
 }
