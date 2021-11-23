@@ -41,29 +41,30 @@ import java.util.concurrent.TimeUnit;
   ]
 */
 
-@Getter
-@Setter
-@EqualsAndHashCode
+@Data
 public class BinanceCandlestick {
-    public String symbol;
-    public Long openTime = null;
-    public Double open = null;
-    public Double high = null;
-    public Double low = null;
-    public Double close = null;
-    public Double volume = null;
-    public Long closeTime = null;
-    public Double quoteAssetVolume = null;
-    public Long numberOfTrades = null;
-    public Double takerBuyBaseAssetVolume = null;
-    public Double takerBuyQuoteAssetVolume = null;
+    String symbol;
+    BinanceInterval interval;
+    Long openTime = null;
+    Double open = null;
+    Double high = null;
+    Double low = null;
+    Double close = null;
+    Double volume = null;
+    Long closeTime = null;
+    Double quoteAssetVolume = null;
+    Long numberOfTrades = null;
+    Double takerBuyBaseAssetVolume = null;
+    Double takerBuyQuoteAssetVolume = null;
 
-    public BinanceCandlestick(String symbol){
+    public BinanceCandlestick(String symbol, BinanceInterval interval){
         this.symbol = Objects.requireNonNull(symbol);
+        this.interval = Objects.requireNonNull(interval);
     }
 
-    public BinanceCandlestick read(JsonArray jsonArray) throws BinanceApiException {
+    public BinanceCandlestick read(JsonArray jsonArray, BinanceInterval interval) throws BinanceApiException {
         this.symbol = Objects.requireNonNull(symbol);
+        this.interval = Objects.requireNonNull(interval);
         if (jsonArray.size() < 11) {
             throw new BinanceApiException("Error reading candlestick, 11 parameters expected, "
                     + jsonArray.size() + " found");
@@ -103,7 +104,10 @@ public class BinanceCandlestick {
     }
 
     public long getFrameDuration(){
-        return closeTime - openTime;
+        if(openTime!=null && closeTime!=null) {
+            return closeTime - openTime;
+        }
+        return 0;
     }
 
     public Double getDistance(){
@@ -119,10 +123,12 @@ public class BinanceCandlestick {
     }
 
     public String getFrameType() {
-        if(close>open){
-            return "ASC";
-        }else if(open>close){
-            return "DESC";
+        if(close!=null && open!=null) {
+            if (close > open) {
+                return "ASC";
+            } else if (open > close) {
+                return "DESC";
+            }
         }
         return "EQUAL";
     }
@@ -133,7 +139,10 @@ public class BinanceCandlestick {
     }
 
     public Float getChangeRate() {
-        return (float)(getChangeAmount() / open);
+        if(open!=null) {
+            return (float) (getChangeAmount() / open);
+        }
+        return 0.0f;
     }
 
     public Double getChangeRatePerTimeUnit(TimeUnit timeUnit, long units) {
@@ -142,13 +151,17 @@ public class BinanceCandlestick {
     }
 
     public Double getChangeAmount() {
-        return close - open;
+        if(close!=null && open!=null) {
+            return close - open;
+        }
+        return 0.0;
     }
 
     @Override
     public String toString() {
         return "BinanceCandlestick{\n" +
                 "  symbol                    = '" + symbol + '\'' + "\n" +
+                "  interval                  = '" + interval + '\'' + "\n" +
                 "  type                      = " + getFrameType() +"\n" +
                 "  openTime                  = " + openTime +"\n" +
                 "  open                      = " + open +"\n" +

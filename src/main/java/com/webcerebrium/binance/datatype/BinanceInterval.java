@@ -45,7 +45,7 @@ public enum BinanceInterval {
 
     @Override
     public String toString() {
-        return this.getValue();
+        return value;
     }
 
     static public BinanceInterval lookup(String val) {

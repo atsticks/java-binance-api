@@ -334,8 +334,8 @@ public class BinanceApi {
         String u = baseUrl + "v3/klines" +request.toQueryString();
         JsonArray jsonElements = new BinanceRequest(u).connectionTimeoutSeconds(connectionTimeoutSeconds).read().asJsonArray();
         List<BinanceCandlestick> list = new LinkedList<>();
-        for (JsonElement e : jsonElements) list.add(new BinanceCandlestick(request.getSymbol().toString())
-                .read(e.getAsJsonArray()));
+        for (JsonElement e : jsonElements) list.add(new BinanceCandlestick(request.getSymbol().toString(), request.getInterval())
+                .read(e.getAsJsonArray(), request.getInterval()));
         return list;
     }
 
@@ -521,6 +521,7 @@ public class BinanceApi {
                 .sign(apiKey, secretKey, null).read().asJsonArray();
         for (JsonElement tr : arr) {
             BinanceTradeFee fee = new BinanceTradeFee();
+            fee.setSymbol(symbol.getSymbol());
             fee.setTimestamp(System.currentTimeMillis());
             fee.setMakerCommission(tr.getAsJsonObject().get("makerCommission").getAsDouble());
             fee.setTakerCommission(tr.getAsJsonObject().get("takerCommission").getAsDouble());

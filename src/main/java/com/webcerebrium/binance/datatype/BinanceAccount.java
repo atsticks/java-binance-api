@@ -62,6 +62,10 @@ public class BinanceAccount {
         return UnmodifiableMap.decorate(assets);
     }
 
+    public BinanceAsset getAsset(String symbol){
+        return this.assets.get(symbol);
+    }
+
     public Set<BinanceAsset> getNonZeroAssets(){
         return assets.values().stream()
                 .filter(a -> a.getFree().doubleValue()>0d)

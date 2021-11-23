@@ -15,7 +15,7 @@ import com.google.gson.JsonParser;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.io.IOUtil;
+import org.apache.commons.io.IOUtils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -253,7 +253,7 @@ public class BinanceRequest {
             }
 
             BufferedReader br = new BufferedReader( new InputStreamReader(is));
-            lastResponse = IOUtil.toString(br);
+            lastResponse = IOUtils.toString(br);
             log.debug("Response: {}", lastResponse);
 
             if (conn.getResponseCode() >= HttpURLConnection.HTTP_BAD_REQUEST) {
