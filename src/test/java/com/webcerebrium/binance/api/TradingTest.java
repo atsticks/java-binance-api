@@ -24,7 +24,7 @@ import static org.junit.Assert.assertNotNull;
 @Slf4j
 public class TradingTest {
     private BinanceApi binanceApi = null;
-    private BinanceSymbol symbol = null;
+    private String symbol = null;
     private BinanceOrder order = null;
     private String asset = "";
 
@@ -35,7 +35,7 @@ public class TradingTest {
     public void setUp() throws BinanceApiException {
         binanceApi = new BinanceApi();
         asset = "BNB";
-        symbol = BinanceSymbol.valueOf(asset + "BTC");
+        symbol = asset + "BTC";
         order = null;
 
         walletAsset = binanceApi.getAccount().getAssets().get(asset);
@@ -58,7 +58,7 @@ public class TradingTest {
 
     @Test
     public void testGetTradeFee() throws BinanceApiException {
-        BinanceTradeFee tradeFee = binanceApi.getTradeFee(BinanceSymbol.valueOf("BTCUSDT"), null);
+        BinanceTradeFee tradeFee = binanceApi.getTradeFee("BTCUSDT", null);
         assertNotNull(tradeFee);
         log.info("Trade Fee = {}", tradeFee);
     }

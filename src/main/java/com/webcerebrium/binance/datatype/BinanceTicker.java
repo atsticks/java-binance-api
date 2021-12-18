@@ -34,19 +34,24 @@ package com.webcerebrium.binance.datatype;
 */
 
 import com.google.gson.JsonObject;
-import lombok.Data;
-
+import lombok.*;
 
 
 @Data
+@RequiredArgsConstructor
+@EqualsAndHashCode(of = {"symbol", "timestamp"})
 public class BinanceTicker {
-    public String symbol = null;
-    public Double bidPrice = null;
-    public Double bidQty = null;
-    public Double askPrice = null;
-    public Double askQty = null;
+    @NonNull
+    String symbol;
+    Double bidPrice = null;
+    Double bidQty = null;
+    Double askPrice = null;
+    Double askQty = null;
+    @Getter
+    long timestamp = System.currentTimeMillis();
 
     public void read(JsonObject ob){
+        symbol = ob.get("symbol").getAsString();
         askPrice = ob.get("askPrice").getAsDouble();
         askQty = ob.get("askQty").getAsDouble();
         bidPrice = ob.get("bidPrice").getAsDouble();

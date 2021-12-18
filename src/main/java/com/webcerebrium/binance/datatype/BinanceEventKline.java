@@ -27,6 +27,7 @@ package com.webcerebrium.binance.datatype;
 import com.google.gson.JsonObject;
 import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -60,9 +61,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Data
 @Slf4j
+@EqualsAndHashCode(of = {"symbol", "eventTime", "interval", "startTime"})
 public class BinanceEventKline {
     public Long eventTime;
-    public BinanceSymbol symbol;
+    public String symbol;
     public BinanceInterval interval;
 
     public Long startTime;
@@ -86,10 +88,10 @@ public class BinanceEventKline {
 
     public BinanceEventKline(JsonObject event) throws BinanceApiException {
         eventTime = event.get("E").getAsLong();
-        symbol = BinanceSymbol.valueOf(event.get("s").getAsString());
+        symbol = event.get("s").getAsString();
 
         JsonObject k = event.get("k").getAsJsonObject();
-        log.info(k.get("i").getAsString());
+        log.debug(k.get("i").getAsString());
         interval = BinanceInterval.lookup(k.get("i").getAsString());
 
         startTime = k.get("t").getAsLong();

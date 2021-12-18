@@ -26,11 +26,13 @@
 package com.webcerebrium.binance.datatype;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @Data
 @RequiredArgsConstructor
+@EqualsAndHashCode(of = {"symbol", "timestamp"})
 public class BinanceDepth {
 
     @NonNull
@@ -39,5 +41,7 @@ public class BinanceDepth {
     BinanceBidOrAsk asks;
     @NonNull
     BinanceBidOrAsk bids;
+
+    long timestamp = System.currentTimeMillis();
 
 }

@@ -26,8 +26,11 @@
 package com.webcerebrium.binance.datatype;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+
+@EqualsAndHashCode(of = {"orderNo", "fiatCurrency"})
 public class BinanceFiatPayment {
     /** Example: 7d76d611-0568-4f43-afb6-24cac7767365. */
     public String orderNo;

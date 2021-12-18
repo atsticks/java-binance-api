@@ -30,6 +30,8 @@ package com.webcerebrium.binance.datatype;
 // 1h,2h,4h,6h,8h,12h,
 // 1d,3d,1w,1M
 
+import java.util.Locale;
+
 public enum BinanceInterval {
 
     ONE_MIN("1m"),
@@ -83,6 +85,16 @@ public enum BinanceInterval {
         if (val.equals(THREE_DAYS.toString())) return THREE_DAYS;
         if (val.equals(ONE_WEEK.toString())) return ONE_WEEK;
         return ONE_MONTH;
+    }
+
+    public static BinanceInterval match(String value){
+        value = value.toLowerCase(Locale.ROOT);
+        for(BinanceInterval iv:values()){
+            if(iv.name().toLowerCase(Locale.ROOT).equals(value)){
+                return iv;
+            }
+        }
+        return null;
     }
 
 }

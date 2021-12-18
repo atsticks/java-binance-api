@@ -26,7 +26,7 @@
 package com.webcerebrium.binance.datatype;
 
 import lombok.Data;
-
+import lombok.EqualsAndHashCode;
 
 
 /**
@@ -44,6 +44,7 @@ import lombok.Data;
  */
 
 @Data
+@EqualsAndHashCode(of = {"id"})
 public class BinanceTrade {
     public Long id;
     public String commissionAsset;

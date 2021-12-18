@@ -30,12 +30,12 @@ import static org.junit.Assert.assertTrue;
 public class MarketDataEndpointsTest {
 
     private BinanceApi binanceApi = null;
-    private BinanceSymbol symbol = null;
+    private String symbol = null;
 
     @Before
     public void setUp() throws Exception, BinanceApiException {
         binanceApi = new BinanceApi();
-        symbol = BinanceSymbol.valueOf("ETHBTC");
+        symbol = "ETHBTC";
     }
 
     @Test

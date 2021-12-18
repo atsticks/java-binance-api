@@ -44,10 +44,11 @@ package com.webcerebrium.binance.datatype;
  */
 
 import lombok.Data;
-
+import lombok.EqualsAndHashCode;
 
 
 @Data
+@EqualsAndHashCode(of = {"symbol", "orderId", "time"})
 public class BinanceOrder {
     public String symbol;
     public Long orderId;

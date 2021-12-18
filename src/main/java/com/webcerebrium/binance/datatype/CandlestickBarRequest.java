@@ -35,7 +35,7 @@ import lombok.Setter;
 public class CandlestickBarRequest {
 
     @NonNull
-    BinanceSymbol symbol;
+    String symbol;
     @NonNull
     BinanceInterval interval;
     /** Start of query period, maximal 1 h duration. */

@@ -69,11 +69,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.LinkedList;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(of = {"eventTime"})
 public class BinanceEventOutboundAccountInfo {
     public Long eventTime;
     public Long makerCommission;

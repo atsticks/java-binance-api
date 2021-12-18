@@ -26,23 +26,39 @@
 package com.webcerebrium.binance.datatype;
 
 import com.google.gson.JsonObject;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 @Data
+@EqualsAndHashCode(of = {"name", "timestamp"})
 @RequiredArgsConstructor
-public final class BinanceAveragePrice {
+public final class BinanceAveragePrice implements Comparable<BinanceAveragePrice> {
     @NonNull
     private String name;
     private Double price;
     private int mins;
+    private long timestamp = System.currentTimeMillis();
 
     public void read(JsonObject ob){
         price = ob.get("price").getAsDouble();
         mins =  ob.get("mins").getAsInt();
+    }
+
+    @Override
+    public int compareTo(BinanceAveragePrice o) {
+        if(o==null){
+            return -1;
+        }
+        if(price == null && o.price==null){
+            return 0;
+        }else if(price!=null){
+            return -1;
+        }else if(o.price!=null){
+            return 1;
+        }
+        return price.compareTo(o.price);
     }
 
     @Override

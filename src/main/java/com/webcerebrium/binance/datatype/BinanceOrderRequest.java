@@ -33,7 +33,7 @@ import lombok.NonNull;
 @Builder
 public class BinanceOrderRequest {
     @NonNull
-    BinanceSymbol symbol;
+    String symbol;
     Long orderId;
     String origClientOrderId;
     Long recvWindow;

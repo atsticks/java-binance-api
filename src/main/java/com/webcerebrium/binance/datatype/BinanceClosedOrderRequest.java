@@ -32,21 +32,21 @@ import lombok.Data;
 @Builder
 public class BinanceClosedOrderRequest {
     /** start time in Milliseconds. */
-    private Long start;
+    Long start;
     /** end time in Milliseconds */
-    private Long end;
+    Long end;
     /** limit, default 500; max 1000.*/
-    private Integer limit = 500;
+    Integer limit = 500;
     /** offset, start with 0; default 0.*/
-    private Integer offset = 0;
+    Integer offset = 0;
     /** order side. 1 for buy and 2 for sell. */
-    private BinanceOrderSide side;
+    BinanceOrderSide side;
     /** order status list. Allowed value: [Ack, IocExpire, IocNoFill, FullyFill, Canceled, Expired, FailedBlocking, FailedMatching]. */
-    private BinanceOrderStatus2 status;
+    BinanceOrderStatus2 status;
     /** The symbol. */
-    private BinanceSymbol symbol;
+    String symbol;
     /** total number required, 0 for not required and 1 for required; default not required, return total=-1 in response. */
-    private boolean total;
+    boolean total;
 
     public String toQueryString(){
         String result = "";

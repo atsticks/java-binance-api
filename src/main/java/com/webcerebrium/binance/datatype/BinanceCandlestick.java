@@ -35,6 +35,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +60,8 @@ import java.util.concurrent.TimeUnit;
 */
 
 @Data
-public class BinanceCandlestick {
+@EqualsAndHashCode(of = {"symbol", "interval", "openTime"})
+public class BinanceCandlestick implements Comparable<BinanceCandlestick> {
     String symbol;
     BinanceInterval interval;
     Long openTime = null;
@@ -73,6 +75,7 @@ public class BinanceCandlestick {
     Long numberOfTrades = null;
     Double takerBuyBaseAssetVolume = null;
     Double takerBuyQuoteAssetVolume = null;
+    long timestamp = System.currentTimeMillis();
 
     public BinanceCandlestick(String symbol, BinanceInterval interval){
         this.symbol = Objects.requireNonNull(symbol);
@@ -172,6 +175,21 @@ public class BinanceCandlestick {
             return close - open;
         }
         return 0.0;
+    }
+
+    @Override
+    public int compareTo(BinanceCandlestick o) {
+        if(o==null){
+            return -1;
+        }
+        if(getClose() == null && o.getClose()==null){
+            return 0;
+        }else if(getClose()!=null){
+            return -1;
+        }else if(o.getClose()!=null){
+            return 1;
+        }
+        return getClose().compareTo(o.getClose());
     }
 
     @Override

@@ -27,6 +27,7 @@ package com.webcerebrium.binance.datatype;
 
 import com.google.gson.JsonObject;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,6 +35,7 @@ import lombok.Setter;
 import java.util.Objects;
 
 @Data
+@EqualsAndHashCode(of = {"symbol", "openTime"})
 public final class BinanceTicker24 {
     private String symbol;
     private Double priceChange;

@@ -30,6 +30,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -46,6 +47,7 @@ import java.util.*;
 */
 @Data
 @Slf4j
+@EqualsAndHashCode(of = {"serverTime", "timezone"})
 public class BinanceExchangeInfo {
     String timezone = null;
     Long serverTime = 0L;

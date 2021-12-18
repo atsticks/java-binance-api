@@ -34,7 +34,7 @@ import lombok.NonNull;
 public class BinanceAggregatedTradesRequest {
     /** The symbol, required. */
     @NonNull
-    BinanceSymbol symbol;
+    String symbol;
     /** Trade id to fetch from. Default gets most recent trades. */
     Long fromId;
     /** Start of query period, maximal 1 h duration. */

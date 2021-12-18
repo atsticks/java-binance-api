@@ -32,10 +32,12 @@ import java.util.Objects;
 
 @Data
 @RequiredArgsConstructor
+@EqualsAndHashCode(of = {"symbol", "timestamp"})
 public final class BinancePrice {
     @NonNull
     private String symbol;
     private Double value;
+    private long timestamp = System.currentTimeMillis();
 
     @Override
     public boolean equals(Object o) {

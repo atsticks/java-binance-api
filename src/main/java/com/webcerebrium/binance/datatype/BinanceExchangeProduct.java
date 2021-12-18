@@ -28,6 +28,7 @@ package com.webcerebrium.binance.datatype;
 import com.google.gson.JsonObject;
 import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -36,6 +37,7 @@ import java.util.Set;
 
 @Data
 @Slf4j
+@EqualsAndHashCode(of = {"symbol", "lastAggTradeId"})
 public class BinanceExchangeProduct {
     boolean active;
     Double activeBuy;
@@ -55,7 +57,7 @@ public class BinanceExchangeProduct {
     String quoteAsset;
     String quoteAssetUnit;
     String status;
-    BinanceSymbol symbol;
+    String symbol;
     Double tickSize;
     Double tradedMoney;
     Double volume;
@@ -87,7 +89,7 @@ public class BinanceExchangeProduct {
 
     public BinanceExchangeProduct(JsonObject obj) throws BinanceApiException {
 
-        symbol = BinanceSymbol.valueOf(obj.get("symbol").getAsString());
+        symbol = obj.get("symbol").getAsString();
         active = obj.get("active").getAsBoolean();
 
         quoteAsset = obj.get("quoteAsset").getAsString();

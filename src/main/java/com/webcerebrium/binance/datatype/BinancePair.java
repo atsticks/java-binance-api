@@ -27,24 +27,45 @@ package com.webcerebrium.binance.datatype;
 
 import com.google.gson.JsonObject;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+import java.util.Objects;
 
 @Data
+@EqualsAndHashCode(of = {"symbol", "pairType"})
 public class BinancePair {
+
+    public enum BinancePairType{
+        isolated,
+        crossmargin
+    }
 
    // Required: base_asset_symbol,list_price,lot_size,quote_asset_symbol,tick_size
     String symbol; //
     String baseSymbol; // base_asset_symbol:
     String quoteSymbol;
+    @Getter
+    BinancePairType pairType;
     boolean sellAllowed;
     boolean buyAllowed;
     boolean marginTrade;
 
-    public BinancePair(JsonObject ob) {
+
+    public BinancePair(JsonObject ob, BinancePairType type) {
         symbol = ob.get("symbol").getAsString();
         baseSymbol = ob.get("base").getAsString();
         quoteSymbol = ob.get("quote").getAsString();
         sellAllowed = ob.get("isSellAllowed").getAsBoolean();
         buyAllowed = ob.get("isBuyAllowed").getAsBoolean();
         marginTrade = ob.get("isMarginTrade").getAsBoolean();
+        pairType = Objects.requireNonNull(type);
     }
+
+    public BinancePair(String symbol, BinancePairType type) {
+        this.pairType = Objects.requireNonNull(type);
+        this.symbol = Objects.requireNonNull(symbol);
+    }
+
+
 }

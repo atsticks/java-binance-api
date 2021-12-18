@@ -27,6 +27,7 @@ package com.webcerebrium.binance.datatype;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
 @Data
@@ -34,7 +35,7 @@ import lombok.NonNull;
 public class BinanceMyTradesRequest {
     /** The symbol, required. */
     @NonNull
-    BinanceSymbol symbol;
+    String symbol;
     Integer orderId;
     /** Start of query period, maximal 1 h duration. */
     Long startTime;

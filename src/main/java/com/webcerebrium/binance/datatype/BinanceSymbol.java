@@ -31,12 +31,13 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Data
-public class BinanceSymbol {
+public final class BinanceSymbol {
 
-    private String symbol = "";
+//    private String symbol = "";
 
-    public BinanceSymbol(String symbol)  throws BinanceApiException {
+    private BinanceSymbol(){}
+
+    public static String normalize(String symbol)  throws BinanceApiException {
         // sanitizing symbol, preventing from common user-input errors
         if (Strings.isNullOrEmpty(symbol)) {
             throw new BinanceApiException("Symbol cannot be empty. Example: BQXBTC");
@@ -47,35 +48,30 @@ public class BinanceSymbol {
 //        if (!symbol.endsWith("BTC") && !symbol.endsWith("ETH")&& !symbol.endsWith("BNB") && !symbol.endsWith("USDT")) {
 //            throw new BinanceApiException("Market Symbol should be ending with BTC, ETH, BNB or USDT. Example: BQXBTC. Provided: " + symbol);
 //        }
-        this.symbol = symbol.replace("_", "").replace("-", "").toUpperCase();
+        return symbol.replace("_", "").replace("-", "").toUpperCase();
     }
 
-    public String toString() { return this.getSymbol(); }
 
-    public static BinanceSymbol valueOf(String s) throws BinanceApiException {
-        return new BinanceSymbol(s);
+    public static String BTC(String pair) throws BinanceApiException {
+       return normalize(pair.toUpperCase() + "BTC");
     }
 
-    public static BinanceSymbol BTC(String pair) throws BinanceApiException {
-       return BinanceSymbol.valueOf(pair.toUpperCase() + "BTC");
+    public static String ETH(String pair) throws BinanceApiException {
+       return normalize(pair.toUpperCase() + "ETH");
     }
 
-    public static BinanceSymbol ETH(String pair) throws BinanceApiException {
-       return BinanceSymbol.valueOf(pair.toUpperCase() + "ETH");
+    public static String BNB(String pair) throws BinanceApiException {
+        return normalize(pair.toUpperCase() + "BNB");
+    }
+    public static String USDT(String pair) throws BinanceApiException {
+       return normalize(pair.toUpperCase() + "USDT");
     }
 
-    public static BinanceSymbol BNB(String pair) throws BinanceApiException {
-        return BinanceSymbol.valueOf(pair.toUpperCase() + "BNB");
-    }
-    public static BinanceSymbol USDT(String pair) throws BinanceApiException {
-       return BinanceSymbol.valueOf(pair.toUpperCase() + "USDT");
-    }
-
-    public boolean contains(String coin) {
+    public static boolean contains(String symbol, String coin) {
         return (symbol.endsWith(coin.toUpperCase())) || (symbol.startsWith(coin.toUpperCase()));
     }
 
-    public String getOpposite(String coin) {
+    public static String getOpposite(String symbol, String coin) {
         if (symbol.startsWith(coin)) {
             return symbol.substring((coin).length());
         }

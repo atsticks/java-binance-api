@@ -26,8 +26,10 @@
 package com.webcerebrium.binance.datatype;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(of = {"symbol", "orderId", "transactionTime"})
 public class BinanceNewOrder {
     public String symbol;
     public Long orderId;

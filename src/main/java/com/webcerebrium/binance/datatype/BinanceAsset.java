@@ -26,21 +26,20 @@
 package com.webcerebrium.binance.datatype;
 
 import com.google.gson.JsonObject;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 
 import java.util.Objects;
 
 @Data
+@EqualsAndHashCode(of = {"name"})
 @RequiredArgsConstructor
 public final class BinanceAsset {
     @NonNull
     private String name;
     private Double free;
     private Double locked;
+    private long timestamp = System.currentTimeMillis();
 
     public void read(JsonObject ob){
         free = ob.get("free").getAsDouble();

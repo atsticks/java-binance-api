@@ -29,7 +29,9 @@ public enum BinanceOrderType {
     LIMIT,
     MARKET,
     LIMIT_MAKER,
+    STOP_LOSS,
     STOP_LOSS_LIMIT,
+    TAKE_PROFIT,
     TAKE_PROFIT_LIMIT;
 
 }

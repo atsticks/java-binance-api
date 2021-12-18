@@ -32,7 +32,7 @@ import lombok.Data;
 @Builder
 public class BinanceDeleteOrderRequest {
     /** The symbol. */
-    BinanceSymbol symbol;
+    String symbol;
     Integer recvWindow = 5000;
     long timestamp = System.currentTimeMillis();
 

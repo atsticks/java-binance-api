@@ -26,10 +26,12 @@
 package com.webcerebrium.binance.datatype;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
 @Data
 @RequiredArgsConstructor
+@EqualsAndHashCode(of = {"coin", "txId"})
 public class BinanceWithdrawTransaction {
     private String address;
     private Double amount;

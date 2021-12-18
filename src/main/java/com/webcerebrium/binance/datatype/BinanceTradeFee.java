@@ -26,8 +26,10 @@
 package com.webcerebrium.binance.datatype;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(of = {"symbol", "timestamp"})
 public class BinanceTradeFee {
 
     String symbol;

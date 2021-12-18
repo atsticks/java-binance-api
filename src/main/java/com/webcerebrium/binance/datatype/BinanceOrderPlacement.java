@@ -29,31 +29,28 @@ import com.google.common.base.Strings;
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;
 import com.webcerebrium.binance.api.BinanceApiException;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
+
+import java.util.Objects;
 
 
 @Data
 @RequiredArgsConstructor
 public class BinanceOrderPlacement {
     @NonNull
-    public BinanceSymbol symbol = null;
+    public String symbol;
     @NonNull
-    public BinanceOrderSide side = null;
-    public BinanceOrderType type = BinanceOrderType.LIMIT;
-    public BinanceTimeInForce timeInForce = BinanceTimeInForce.GOOD_TILL_CANCELLED;
-    public Double quantity;
-    public Double price;
-    public String newClientOrderId = "";
-    public Double stopPrice = null;
-    public Double icebergQty = null;
+    BinanceOrderSide side;
+    BinanceOrderType type = BinanceOrderType.LIMIT;
+    BinanceTimeInForce timeInForce = BinanceTimeInForce.GOOD_TILL_CANCELLED;
+    Double quantity;
+    Double quoteOrderQty;
+    Double price;
+    String newClientOrderId = "";
+    Double stopPrice;
+    Double icebergQty;
+    Long recvWindow;
 
-    public BinanceOrderPlacement(BinanceSymbol symbol, BinanceOrderSide side) {
-        this.symbol = symbol;
-        this.side = side;
-    }
 
     public String getAsQuery() throws BinanceApiException {
         StringBuffer sb = new StringBuffer();
@@ -61,34 +58,92 @@ public class BinanceOrderPlacement {
         if (symbol == null) {
             throw new BinanceApiException("Order Symbol is not set");
         }
-        sb.append("&symbol=").append(symbol.toString());
-        if (side == null) {
-            throw new BinanceApiException("Order side is not set");
-        }
-        sb.append("&side=").append(side.toString());
         if (type == null) {
             throw new BinanceApiException("Order type is not set");
         }
-        sb.append("&type=").append(type.toString());
-        if (quantity == null || quantity.compareTo(0d) <= 0) {
-            throw new BinanceApiException("Order quantity should be bigger than zero");
+        if (side == null) {
+            throw new BinanceApiException("Order side is not set");
         }
-        sb.append("&quantity=").append(quantity.toString());
-
-        if (type == BinanceOrderType.MARKET) {
-            // price should be skipped for a market order, we are accepting market price
-            // so should timeInForce
-        } else {
-            if (timeInForce == null) {
-                throw new BinanceApiException("Order timeInForce is not set");
-            }
-            sb.append("&timeInForce=").append(timeInForce.toString());
-            if (price == null || price.compareTo(0d) <= 0) {
-                throw new BinanceApiException("Order price should be bigger than zero");
-            }
-            sb.append("&price=").append(price.toString());
+        switch(type){
+            case MARKET:
+                if(quantity==null && quoteOrderQty == null){
+                    throw new BinanceApiException("MARKET order requires either quantity or quoteOrderQty to be set.");
+                }
+                if(quantity!=null){
+                    if (quantity.compareTo(0d) <= 0) {
+                        throw new BinanceApiException("MARKET order requires a quantity >= 0");
+                    }
+                }else{
+                    if (quoteOrderQty.compareTo(0d) <= 0) {
+                        throw new BinanceApiException("MARKET order requires a quoteOrderQty >= 0");
+                    }
+                }
+                break;
+            case LIMIT:
+                if(timeInForce==null || quantity==null || price == null){
+                    throw new BinanceApiException("LIMIT order requires timeInForce, quantity and price to be set.");
+                }
+                if (quantity.compareTo(0d) <= 0) {
+                    throw new BinanceApiException("LIMIT order requires a quantity >= 0");
+                }
+                break;
+            case STOP_LOSS:
+                if(stopPrice==null || quantity==null){
+                    throw new BinanceApiException("STOP_LOSS order requires quantity and stopPrice to be set.");
+                }
+                if (quantity.compareTo(0d) <= 0) {
+                    throw new BinanceApiException("STOP_LOSS order requires a quantity >= 0");
+                }
+                break;
+            case TAKE_PROFIT:
+                if(quantity==null || stopPrice == null){
+                    throw new BinanceApiException("TAKE_PROFIT order requires quantity and stopPrice to be set.");
+                }
+                if (quantity.compareTo(0d) <= 0) {
+                    throw new BinanceApiException("TAKE_PROFIT order requires a quantity >= 0");
+                }
+                break;
+            case STOP_LOSS_LIMIT:
+                if(timeInForce==null || quantity==null || price == null || stopPrice == null){
+                    throw new BinanceApiException("STOP_LOSS_LIMIT order requires timeInForce, quantity, price and stopPrice to be set.");
+                }
+                if (quantity.compareTo(0d) <= 0) {
+                    throw new BinanceApiException("STOP_LOSS_LIMIT order requires a quantity >= 0");
+                }
+                break;
+            case TAKE_PROFIT_LIMIT:
+                if(timeInForce==null || quantity==null || price == null || stopPrice == null){
+                    throw new BinanceApiException("TAKE_PROFIT_LIMIT order requires timeInForce, quantity, price and stopPrice to be set.");
+                }
+                if (quantity.compareTo(0d) <= 0) {
+                    throw new BinanceApiException("TAKE_PROFIT_LIMIT order requires a quantity >= 0");
+                }
+                break;
+            case LIMIT_MAKER:
+                if(quantity==null || price == null){
+                    throw new BinanceApiException("LIMIT_MAKER order requires quantity and price to be set.");
+                }
+                if (quantity.compareTo(0d) <= 0) {
+                    throw new BinanceApiException("LIMIT_MAKER order requires a quantity >= 0");
+                }
+                break;
         }
-
+        // timestamp is also required, but will added implicitly later...
+        sb.append("&symbol=").append(symbol);
+        sb.append("&side=").append(side.name());
+        sb.append("&type=").append(type.name());
+        if (timeInForce != null) {
+            sb.append("&timeInForce=").append(timeInForce.name());
+        }
+        if (quantity != null) {
+            sb.append("&quantity=").append(quantity);
+        }
+        if (quoteOrderQty != null) {
+            sb.append("&quoteOrderQty=").append(quoteOrderQty);
+        }
+        if(price !=null){
+            sb.append("&price=").append(price);
+        }
         if (!Strings.isNullOrEmpty(newClientOrderId)) {
             sb.append("&newClientOrderId=").append(esc.escape(newClientOrderId));
         }
@@ -97,6 +152,9 @@ public class BinanceOrderPlacement {
         }
         if (icebergQty != null) {
             sb.append("&icebergQty=").append(icebergQty.toString());
+        }
+        if(recvWindow !=null){
+            sb.append("&recvWindow=").append(recvWindow);
         }
         return sb.toString().substring(1); // skipping the first &
     }

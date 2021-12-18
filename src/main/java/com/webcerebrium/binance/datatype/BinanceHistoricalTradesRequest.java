@@ -34,7 +34,7 @@ import lombok.NonNull;
 public class BinanceHistoricalTradesRequest {
     /** The symbol, required. */
     @NonNull
-    BinanceSymbol symbol;
+    String symbol;
     /** Trade id to fetch from. Default gets most recent trades. */
     Long fromId;
     /** Max number of results, Default 500; max 1000. */

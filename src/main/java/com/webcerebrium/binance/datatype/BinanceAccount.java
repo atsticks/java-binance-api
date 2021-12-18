@@ -29,6 +29,7 @@ import com.google.gson.JsonObject;
 import com.webcerebrium.binance.api.BinanceApi;
 import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.commons.collections.map.UnmodifiableMap;
 import org.apache.commons.collections.set.UnmodifiableSet;
 
@@ -39,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Data
+@EqualsAndHashCode(of = {"updateTime", "accountType"})
 public class BinanceAccount {
 
     private Double makerCommission;

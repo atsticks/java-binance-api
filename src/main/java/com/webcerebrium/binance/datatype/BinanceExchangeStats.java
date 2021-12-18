@@ -67,9 +67,9 @@ public class BinanceExchangeStats {
         return result;
     }
 
-    public Set<BinanceSymbol> getSymbolsOf(String coin) throws BinanceApiException {
+    public Set<String> getSymbolsOf(String coin) throws BinanceApiException {
         List<BinanceExchangeProduct> coins = getMarketsOf(coin);
-        Set<BinanceSymbol> result = new TreeSet<>();
+        Set<String> result = new TreeSet<>();
         for (BinanceExchangeProduct sym: coins) {
             result.add(sym.getSymbol());
         }
@@ -80,7 +80,7 @@ public class BinanceExchangeStats {
         List<BinanceExchangeProduct> coins = getMarketsOf(coin);
         Set<String> result = new TreeSet<>();
         for (BinanceExchangeProduct sym: coins) {
-            result.add(sym.getSymbol().getOpposite(coin));
+            result.add(BinanceSymbol.getOpposite(sym.getSymbol(), coin));
         }
         return result;
     }

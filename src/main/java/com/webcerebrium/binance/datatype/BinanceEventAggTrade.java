@@ -28,7 +28,7 @@ package com.webcerebrium.binance.datatype;
 import com.google.gson.JsonObject;
 import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.Data;
-
+import lombok.EqualsAndHashCode;
 
 
 /**
@@ -47,9 +47,10 @@ import lombok.Data;
  }
  */
 @Data
+@EqualsAndHashCode(of = {"symbol", "eventTime", "aggregatedTradeId"})
 public class BinanceEventAggTrade {
     public Long eventTime;
-    public BinanceSymbol symbol;
+    public String symbol;
     public Long aggregatedTradeId;
     public Double price;
     public Double quantity;
@@ -60,7 +61,7 @@ public class BinanceEventAggTrade {
 
     public BinanceEventAggTrade(JsonObject event) throws BinanceApiException {
         eventTime = event.get("E").getAsLong();
-        symbol = BinanceSymbol.valueOf(event.get("s").getAsString());
+        symbol = event.get("s").getAsString();
         aggregatedTradeId = event.get("a").getAsLong();
         price = event.get("p").getAsDouble();
         quantity = event.get("q").getAsDouble();

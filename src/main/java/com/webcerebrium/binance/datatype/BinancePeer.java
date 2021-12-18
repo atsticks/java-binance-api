@@ -28,11 +28,13 @@ package com.webcerebrium.binance.datatype;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(of = {"id", "version"})
 public class BinancePeer {
 
     /** Authenticated identifier

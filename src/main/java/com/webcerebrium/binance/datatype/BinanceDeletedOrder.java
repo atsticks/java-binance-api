@@ -27,8 +27,10 @@ package com.webcerebrium.binance.datatype;
 
 import com.google.gson.JsonObject;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(of = {"symbol", "orderId"})
 public class BinanceDeletedOrder {
 
     String symbol;

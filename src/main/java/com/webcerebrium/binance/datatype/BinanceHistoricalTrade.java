@@ -37,9 +37,12 @@ package com.webcerebrium.binance.datatype;
 //        "isBestMatch":true
 //        }
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 
 @Data
+
+@EqualsAndHashCode(of = {"id"})
 public class BinanceHistoricalTrade {
 
     public long id;

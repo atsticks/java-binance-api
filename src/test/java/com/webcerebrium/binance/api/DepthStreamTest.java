@@ -22,12 +22,12 @@ import org.junit.Test;
 public class DepthStreamTest {
 
     private BinanceApi binanceApi = null;
-    private BinanceSymbol symbol = null;
+    private String symbol = null;
 
     @Before
     public void setUp() throws Exception, BinanceApiException {
         binanceApi = new BinanceApi();
-        symbol = BinanceSymbol.valueOf("ETHBTC");
+        symbol = "ETHBTC";
     }
 
     @Test

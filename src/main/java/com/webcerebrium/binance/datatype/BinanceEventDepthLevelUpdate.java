@@ -28,11 +28,13 @@ package com.webcerebrium.binance.datatype;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import lombok.EqualsAndHashCode;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+@EqualsAndHashCode(of = {"lastUpdateId"})
 public class BinanceEventDepthLevelUpdate {
 
     private Long lastUpdateId;

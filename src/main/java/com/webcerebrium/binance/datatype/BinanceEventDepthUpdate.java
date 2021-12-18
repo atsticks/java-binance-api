@@ -30,6 +30,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -67,16 +68,17 @@ import java.util.List;
     }
  */
 @Data
+@EqualsAndHashCode(of = {"symbol", "eventTime", "updateId"})
 public class BinanceEventDepthUpdate {
     public Long eventTime;
-    public BinanceSymbol symbol;
+    public String symbol;
     public Long updateId;
     public List<BinanceBidOrAsk> bids = null;
     public List<BinanceBidOrAsk> asks = null;
 
     public BinanceEventDepthUpdate(JsonObject event) throws BinanceApiException {
         eventTime = event.get("E").getAsLong();
-        symbol = BinanceSymbol.valueOf(event.get("s").getAsString());
+        symbol = event.get("s").getAsString();
         updateId = event.get("u").getAsLong();
 
         bids = new LinkedList<>();

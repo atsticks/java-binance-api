@@ -30,6 +30,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -55,6 +56,7 @@ import java.util.*;
  */
 @Slf4j
 @Data
+@EqualsAndHashCode(of = {"symbol"})
 public class BinanceExchangeSymbol {
 
     String symbol;
