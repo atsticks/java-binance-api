@@ -70,11 +70,15 @@ public class BinanceApi {
      */
     public String baseTestUrl = "https://testnet.binance.vision/api/";
     /**
-     * Old W-API Base URL. Might not function well at that moment, please use modern wapi3 API instead
+     * Old V-API Base URL. Might not function well at that moment, please use modern wapi3 API instead.
+     */
+    public String baseVapiUrl = "https://api.binance.com/vapi/";
+    /**
+     * Old W-API Base URL. Might not function well at that moment, please use modern wapi3 API instead.
      */
     public String baseWapiUrl = "https://api.binance.com/wapi/";
     /**
-     * Old W-API Base URL. Might not function well at that moment, please use modern wapi3 API instead
+     * Old W-API Base URL. Might not function well at that moment, please use modern wapi3 API instead.
      */
     public String baseSapiUrl = "https://api.binance.com/sapi/";
     /**
@@ -90,6 +94,8 @@ public class BinanceApi {
      * Guava Class Instance for escaping
      */
     private Escaper esc = UrlEscapers.urlFormParameterEscaper();
+
+    private Semaphore maxConnections = new Semaphore(10);
 
     /**
      * Constructor of API when you exactly know the keys
@@ -135,6 +141,7 @@ public class BinanceApi {
      */
     public boolean ping() {
         try {
+            maxConnections.acquire();
             limiter.acquire();
             new BinanceRequest(baseUrl + "v1/ping")
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -144,6 +151,7 @@ public class BinanceApi {
             log.error("Error PING: ", e);
             return false;
         }finally{
+            maxConnections.release();
             limiter.release();
         }
     }
@@ -155,6 +163,7 @@ public class BinanceApi {
      */
     public Long getServerTime() throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire();
             return (new BinanceRequest(baseUrl + "v1/time"))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -163,6 +172,7 @@ public class BinanceApi {
             throw new BinanceApiException(e.toString());
         }
         finally{
+            maxConnections.release();
             limiter.release();
         }
     }
@@ -188,6 +198,7 @@ public class BinanceApi {
      */
     public BinanceNodeInfo getNodeInfo() throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire();
             JsonObject ob = new BinanceRequest(baseUrl + "v1/node-info")
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -204,6 +215,7 @@ public class BinanceApi {
             throw new BinanceApiException(e.toString());
         }
         finally{
+            maxConnections.release();
             limiter.release();
         }
     }
@@ -215,6 +227,7 @@ public class BinanceApi {
      */
     public List<BinancePeer> getPeers() throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire();
             JsonArray arr = new BinanceRequest(baseUrl + "v1/peers")
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -227,6 +240,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release();
         }
     }
@@ -254,6 +268,7 @@ public class BinanceApi {
      */
     public BinanceDepth getDepth(String symbol) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire();
             JsonObject ob = new BinanceRequest(baseUrl + "v1/depth?symbol=" + Objects.requireNonNull(symbol))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -267,6 +282,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release();
         }
     }
@@ -284,7 +300,7 @@ public class BinanceApi {
         if(weight==0)
             weight = 1;
         try{
-
+            maxConnections.acquire();
             limiter.acquire(weight);
             JsonObject ob = new BinanceRequest(baseUrl + "v1/depth?symbol=" + Objects.requireNonNull(symbol) + "&limit=" + limit)
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -298,7 +314,89 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(weight);
+        }
+    }
+
+    /**
+     * Get the current available spot pairs.
+     *
+     * @return result in JSON
+     * @throws BinanceApiException in case of any error
+     */
+    public JsonObject getOptionInfo() throws BinanceApiException {
+        try{
+            maxConnections.acquire();
+            limiter.acquire(1);
+            String url = baseVapiUrl + "v1/optionInfo";
+            JsonObject obj = new BinanceRequest(url).sign(apiKey, secretKey, null)
+                    .read().asJsonObject();
+            List<BinancePair> pairs = new ArrayList<>();
+//            arr.forEach(p -> {
+//                pairs.add(new BinancePair(p.getAsJsonObject(), BinancePair.BinancePairType.isolated));
+//            });
+            return obj;
+        }catch(InterruptedException e){
+            throw new BinanceApiException(e.toString());
+        }finally{
+            maxConnections.release();
+            limiter.release(10);
+        }
+    }
+
+    /**
+     * Get the current available spot tickers.
+     *
+     * @return result in JSON
+     * @throws BinanceApiException in case of any error
+     */
+    public JsonObject getSpotTickers() throws BinanceApiException {
+        try{
+            maxConnections.acquire();
+            limiter.acquire(1);
+            String url = baseVapiUrl + "v1/ticker";
+            JsonObject obj = new BinanceRequest(url).sign(apiKey, secretKey, null)
+                    .read().asJsonObject();
+            List<BinancePair> pairs = new ArrayList<>();
+//            arr.forEach(p -> {
+//                pairs.add(new BinancePair(p.getAsJsonObject(), BinancePair.BinancePairType.isolated));
+//            });
+            return obj;
+        }catch(InterruptedException e){
+            throw new BinanceApiException(e.toString());
+        }finally{
+            maxConnections.release();
+            limiter.release(10);
+        }
+    }
+
+    /**
+     * Get the current available spot tickers.
+     *
+     * @return result in JSON
+     * @throws BinanceApiException in case of any error
+     */
+    public JsonObject getMarkPrice(String symbol) throws BinanceApiException {
+        try{
+            maxConnections.acquire();
+            limiter.acquire(1);
+            String url = baseVapiUrl + "v1/mark";
+            if(symbol!=null){
+                url += "&symbol="+symbol;
+            }
+            JsonObject obj = new BinanceRequest(url).sign(apiKey, secretKey, null)
+                    .read().asJsonObject();
+            List<BinancePair> pairs = new ArrayList<>();
+//            arr.forEach(p -> {
+//                pairs.add(new BinancePair(p.getAsJsonObject(), BinancePair.BinancePairType.isolated));
+//            });
+            return obj;
+        }catch(InterruptedException e){
+            throw new BinanceApiException(e.toString());
+        }finally{
+            maxConnections.release();
+            limiter.release(10);
         }
     }
 
@@ -311,6 +409,7 @@ public class BinanceApi {
      */
     public List<BinancePair> getIsolatedPairs(Integer recvWindow) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(10);
             String url = baseSapiUrl + "v1/margin/isolated/allPairs";
             if(recvWindow!=null){
@@ -326,6 +425,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(10);
         }
     }
@@ -348,6 +448,7 @@ public class BinanceApi {
      */
     public List<BinancePair> getCrossMargingPairs() throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             JsonArray arr = new BinanceRequest( baseSapiUrl + "v1/margin/allPairs" )
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -361,6 +462,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -374,6 +476,7 @@ public class BinanceApi {
      */
     public List<BinanceHistoricalTrade> getHistoricalTrades(BinanceHistoricalTradesRequest request) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(5);
             String u = baseUrl + "v3/historicalTrades" + request.toQueryString();
             String lastResponse = new BinanceRequest(u)
@@ -384,6 +487,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(5);
         }
     }
@@ -401,6 +505,7 @@ public class BinanceApi {
      */
     public List<BinanceAggregatedTrades> getAggregatedTrades(BinanceAggregatedTradesRequest request) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             String u = baseUrl + "v3/aggTrades" + request.toQueryString();
             String lastResponse = new BinanceRequest(u)
@@ -411,6 +516,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -424,6 +530,7 @@ public class BinanceApi {
      */
     public List<BinanceCandlestick> getCandlestickBars(CandlestickBarRequest request) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire();
             String u = baseUrl + "v3/klines" +request.toQueryString();
             JsonArray jsonElements = new BinanceRequest(u).connectionTimeoutSeconds(connectionTimeoutSeconds).read().asJsonArray();
@@ -434,6 +541,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release();
         }
     }
@@ -445,6 +553,7 @@ public class BinanceApi {
      */
     public BinanceExchangeInfo getExchangeInfo() throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(10);
             JsonObject jsonObject = (new BinanceRequest(baseUrl + "v3/exchangeInfo"))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -453,6 +562,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(10);
         }
     }
@@ -464,6 +574,7 @@ public class BinanceApi {
      */
     public List<BinanceTicker24> get24HrPriceStatistics() throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(40);
             List<BinanceTicker24> result = new ArrayList<>();
             JsonArray data = new BinanceRequest(baseUrl + "v1/ticker/24hr" )
@@ -479,6 +590,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(40);
         }
     }
@@ -491,6 +603,7 @@ public class BinanceApi {
      */
     public BinanceTicker24 get24HrPriceStatistics(String symbol) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             BinanceTicker24 ticker = new BinanceTicker24();
             ticker.setSymbol(Objects.requireNonNull(symbol));
@@ -501,6 +614,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -515,6 +629,7 @@ public class BinanceApi {
      */
     public Double getPrice(String symbol) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             JsonObject ob = new BinanceRequest(baseUrl + "v3/ticker/price?symbol="+Objects.requireNonNull(symbol))
                     .read().asJsonObject();
@@ -522,6 +637,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -534,6 +650,7 @@ public class BinanceApi {
      */
     public Map<String, Double> getPrices() throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(2);
             Map<String, Double> map = new ConcurrentHashMap<>();
             JsonArray array = (new BinanceRequest(baseUrl + "v3/ticker/price"))
@@ -547,6 +664,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(2);
         }
     }
@@ -558,6 +676,7 @@ public class BinanceApi {
      */
     public BinanceAveragePrice getAveragePrice(String symbol) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             JsonObject ob = new BinanceRequest(baseUrl + "v3/avgPrice?symbol="+Objects.requireNonNull(symbol))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -568,6 +687,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -580,6 +700,7 @@ public class BinanceApi {
      */
     public List<BinanceTicker> getBookTickers() throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(2);
             String lastResponse = (new BinanceRequest(baseUrl + "v3/ticker/bookTicker"))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).read().getLastResponse();
@@ -589,6 +710,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(2);
         }
     }
@@ -602,6 +724,7 @@ public class BinanceApi {
      */
     public BinanceTicker getBookTicker(String symbol) throws BinanceApiException {
         try {
+            maxConnections.acquire();
             limiter.acquire(1);
             JsonObject ob = new BinanceRequest(baseUrl + "v3/ticker/bookTicker?symbol=" + Objects.requireNonNull(symbol))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).read().asJsonObject();
@@ -611,6 +734,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -626,6 +750,7 @@ public class BinanceApi {
      */
     public BinanceAccount getAccount() throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(10);
             BinanceAccount account = new BinanceAccount();
             account.read (new BinanceRequest(baseUrl + "v3/account")
@@ -635,6 +760,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(10);
         }
     }
@@ -675,6 +801,7 @@ public class BinanceApi {
      */
     public BinanceTradeFee getTradeFee(String symbol, Integer recvWindow) throws BinanceApiException {
         try {
+            maxConnections.acquire();
             limiter.acquire(1);
             String url = baseSapiUrl + "v1/asset/tradeFee?symbol=" + Objects.requireNonNull(symbol);
             if (recvWindow != null) {
@@ -695,6 +822,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -822,6 +950,7 @@ public class BinanceApi {
 	 */
 	public List<BinanceOrder> getOpenOrders() throws BinanceApiException {
 	    try{
+            maxConnections.acquire();
 	        limiter.acquire(3);
             String u = baseUrl + "v3/openOrders";
             String lastResponse = (new BinanceRequest(u))
@@ -832,6 +961,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(3);
         }
 	}
@@ -844,6 +974,7 @@ public class BinanceApi {
      */
     public List<BinanceOrder> getOpenOrders(BinanceOpenOrderRequest request) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(3);
             String u = baseUrl + "v3/openOrders" + request.toQueryString();
             String lastResponse = (new BinanceRequest(u))
@@ -854,6 +985,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(3);
         }
     }
@@ -866,6 +998,7 @@ public class BinanceApi {
      */
     public List<BinanceOrder> cancelOpenOrder(BinanceDeleteOrderRequest request) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(3);
             String u = baseUrl + "v3/openOrders" + request.toQueryString();
             String lastResponse = (new BinanceRequest(u))
@@ -876,6 +1009,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(3);
         }
     }
@@ -889,6 +1023,7 @@ public class BinanceApi {
      */
     public List<BinanceOrder> getOrders(BinanceAllOrderRequest request) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(10);
             String u = baseUrl + "v3/allOrders"+request.toQueryString();
             String lastResponse = (new BinanceRequest(u))
@@ -899,6 +1034,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(10);
         }
     }
@@ -912,6 +1048,7 @@ public class BinanceApi {
      */
     public List<BinanceOrder> geClosedOrders(BinanceClosedOrderRequest request) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/closedOrders" + request.toQueryString();
             String lastResponse = (new BinanceRequest(u))
@@ -922,6 +1059,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(2);
         }
     }
@@ -937,6 +1075,7 @@ public class BinanceApi {
      */
     public List<BinanceOrder> getOrders(String symbol, Long orderId, int limit) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(10);
             String u = baseUrl + "v3/allOrders?symbol=" + Objects.requireNonNull(symbol) + "&limit=" + limit;
             if (orderId != null && orderId > 0) u += "&orderId=" + orderId;
@@ -948,6 +1087,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(10);
         }
     }
@@ -971,6 +1111,7 @@ public class BinanceApi {
      */
     public List<BinanceTrade> getMyTrades(BinanceMyTradesRequest request) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(10);
             String u = baseUrl + "v3/myTrades" + request.toQueryString();
             String lastResponse = new BinanceRequest(u)
@@ -980,6 +1121,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(10);
         }
     }
@@ -994,6 +1136,7 @@ public class BinanceApi {
      */
     public List<BinanceTrade> getTrades(String symbol, int limit) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             String u = baseUrl + "v3/trades?symbol=" + Objects.requireNonNull(symbol) + "&limit=" + limit;
             // sign(apiKey, secretKey, null)
@@ -1003,6 +1146,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1027,6 +1171,7 @@ public class BinanceApi {
      */
     public BinanceOrder getOrder(BinanceOrderRequest request) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/order"+request.toQueryString();
             String lastResponse = new BinanceRequest(u)
@@ -1035,6 +1180,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(2);
         }
     }
@@ -1050,6 +1196,7 @@ public class BinanceApi {
      */
     public BinanceNewOrder createOrder(BinanceOrderPlacement orderPlacement)  throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/order?" + orderPlacement.getAsQuery();
             String lastResponse = new BinanceRequest(u)
@@ -1058,6 +1205,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(2);
         }
     }
@@ -1069,6 +1217,7 @@ public class BinanceApi {
      */
     public BinanceNewOrder testOrder(BinanceOrderPlacement orderPlacement)  throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             String u = baseUrl + "v3/order/test?" + orderPlacement.getAsQuery();
             String lastResponse = new BinanceRequest(u)
@@ -1077,6 +1226,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1090,6 +1240,7 @@ public class BinanceApi {
      */
     public BinanceDeletedOrder deleteOrderById(String symbol, Long orderId) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/order?symbol=" + Objects.requireNonNull(symbol) + "&orderId=" + orderId;
             JsonObject ob = (new BinanceRequest(u))
@@ -1098,6 +1249,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(2);
         }
     }
@@ -1110,6 +1262,7 @@ public class BinanceApi {
      */
     public BinanceDeletedOrder deleteOrderByOrigClientId(String symbol, String origClientOrderId) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/order?symbol=" + Objects.requireNonNull(symbol) + "&origClientOrderId=" + esc.escape(origClientOrderId);
             JsonObject ob = (new BinanceRequest(u))
@@ -1118,6 +1271,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(2);
         }
     }
@@ -1131,6 +1285,7 @@ public class BinanceApi {
      */
     public BinanceDeletedOrder deleteOrderByNewClientId(String symbol, String newClientOrderId ) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/order?symbol=" + Objects.requireNonNull(symbol) + "&newClientOrderId=" + esc.escape(newClientOrderId);
             JsonObject ob = (new BinanceRequest(u))
@@ -1139,6 +1294,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(2);
         }
     }
@@ -1170,6 +1326,7 @@ public class BinanceApi {
      */
     public String startUserDataStream() throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             JsonObject jsonObject = (new BinanceRequest(baseUrl + "v3/userDataStream"))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -1178,6 +1335,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1189,6 +1347,7 @@ public class BinanceApi {
      */
     public void keepUserDataStream(String listenKey) throws BinanceApiException{
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             new BinanceRequest(baseUrl + "v3/userDataStream?listenKey=" + esc.escape(listenKey))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -1196,6 +1355,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1207,6 +1367,7 @@ public class BinanceApi {
      */
     public void deleteUserDataStream(String listenKey) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             new BinanceRequest(baseUrl + "v3/userDataStream?listenKey=" + esc.escape(listenKey))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -1214,6 +1375,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1229,6 +1391,7 @@ public class BinanceApi {
      */
     public String startIsolatedMarginStream() throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             JsonObject jsonObject = (new BinanceRequest(baseSapiUrl + "v1/userDataStream/isolated"))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -1237,6 +1400,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1248,6 +1412,7 @@ public class BinanceApi {
      */
     public void keepIsolatedMarginStream(String listenKey) throws BinanceApiException{
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             new BinanceRequest(baseSapiUrl + "v1/userDataStream/isolated?listenKey=" + esc.escape(listenKey))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -1255,6 +1420,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1266,6 +1432,7 @@ public class BinanceApi {
      */
     public void deleteIsolatedMarginStream(String listenKey) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             new BinanceRequest(baseSapiUrl + "v1/userDataStream/isolated?listenKey=" + esc.escape(listenKey))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -1273,6 +1440,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1286,6 +1454,7 @@ public class BinanceApi {
      */
     public String startMarginStream() throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             JsonObject jsonObject = (new BinanceRequest(baseSapiUrl + "v1/userDataStream"))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -1294,6 +1463,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1305,6 +1475,7 @@ public class BinanceApi {
      */
     public void keepMarginStream(String listenKey) throws BinanceApiException{
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             new BinanceRequest(baseSapiUrl + "v1/userDataStream?listenKey=" + esc.escape(listenKey))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -1312,6 +1483,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1323,6 +1495,7 @@ public class BinanceApi {
      */
     public void deleteMarginStream(String listenKey) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             new BinanceRequest(baseSapiUrl + "v1/userDataStream?listenKey=" + esc.escape(listenKey))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -1330,6 +1503,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1347,6 +1521,7 @@ public class BinanceApi {
      */
     public List<BinanceFiatOrder> getFiatOrders(BinanceFiatOrderRequest request) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             JsonObject ob = new BinanceRequest(baseSapiUrl + "v1/fiat/orders"+request.toQueryString())
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -1360,6 +1535,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1373,6 +1549,7 @@ public class BinanceApi {
      */
     public List<BinanceFiatPayment> getFiatPayments(BinanceFiatOrderRequest request) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             JsonObject ob = new BinanceRequest(baseSapiUrl + "v1/fiat/payments"+request.toQueryString())
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -1386,6 +1563,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1403,6 +1581,7 @@ public class BinanceApi {
      */
     public Session getWebsocketSession(String url, WebSocketAdapter adapter) throws BinanceApiException {
         try {
+            maxConnections.acquire();
             limiter.acquire();
             URI uri = new URI(websocketBaseUrl + url);
             SslContextFactory sslContextFactory = new SslContextFactory();
@@ -1417,6 +1596,7 @@ public class BinanceApi {
         }catch (Throwable e) {
             throw new BinanceApiException("Websocket error: " + e.getMessage());
         }finally{
+            maxConnections.release();
             limiter.release();
         }
     }
@@ -1508,6 +1688,7 @@ public class BinanceApi {
      */
     public String withdraw(BinanceWithdrawOrder withdrawOrder) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             String u = baseSapiUrl + "/v1/capital/withdraw/apply" + withdrawOrder.toQueryString();
             return (new BinanceRequest(u))
@@ -1516,6 +1697,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1531,6 +1713,7 @@ public class BinanceApi {
      */
     public List<BinanceWithdrawTransaction> getWithdrawHistory(BinanceHistoryFilter historyFilter) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             String u = baseSapiUrl + "v1/capital/withdraw/history" + historyFilter.getAsQuery();
             List<BinanceWithdrawTransaction> result = new ArrayList<>();
@@ -1557,6 +1740,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1572,6 +1756,7 @@ public class BinanceApi {
      */
     public List<BinanceDepositTransaction> getDepositHistory(BinanceHistoryFilter historyFilter) throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             String u = baseSapiUrl + "v1/capital/deposit/hisrec" + historyFilter.getAsQuery();
             List<BinanceDepositTransaction> result = new ArrayList<>();
@@ -1597,6 +1782,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }
@@ -1608,6 +1794,7 @@ public class BinanceApi {
     */
     public BinanceSystemStatus getSystemStatus() throws BinanceApiException {
         try{
+            maxConnections.acquire();
             limiter.acquire(1);
             String u = baseSapiUrl + "v1/system/status";
             JsonObject ob = new BinanceRequest(u).connectionTimeoutSeconds(connectionTimeoutSeconds)
@@ -1619,6 +1806,7 @@ public class BinanceApi {
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
+            maxConnections.release();
             limiter.release(1);
         }
     }

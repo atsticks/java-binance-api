@@ -37,6 +37,7 @@ import java.util.Objects;
 public class BinancePair {
 
     public enum BinancePairType{
+        spot,
         isolated,
         crossmargin
     }
