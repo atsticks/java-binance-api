@@ -29,6 +29,8 @@ import com.google.gson.JsonObject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.Objects;
+
 @Data
 @EqualsAndHashCode(of = {"symbol", "orderId"})
 public class BinanceDeletedOrder {
@@ -46,6 +48,11 @@ public class BinanceDeletedOrder {
     BinanceTimeInForce timeInForce;
     BinanceOrderType type;
     BinanceOrderSide side;
+
+    public BinanceDeletedOrder(String symbol, long orderId) {
+        this.symbol = Objects.requireNonNull(symbol);
+        this.orderId = orderId;
+    }
 
     public BinanceDeletedOrder(JsonObject ob) {
         symbol = ob.get("symbol").getAsString();

@@ -26,26 +26,19 @@
 package com.webcerebrium.binance.datatype;
 
 public enum BinanceTimeInForce {
-    GTC("GTC"),
-    GOOD_TILL_CANCELLED("GTC"),
-    IMMEDIATE_OR_CANCEL("IOC"),
-    IOC("IOC"),
-    FILL_OR_KILL("FOK"),
-    FOK("FOK")
+    GTC("Good ‘til canceled (GTC) is the default instruction stipulating that a trade should be kept open until it’s either executed or manually canceled."),
+    IOC("Immediate or cancel (IOC) orders stipulate that any part of the order that isn’t immediately filled must be canceled."),
+    FOK("Fill or kill (FOK) orders are either filled immediately, or they’re killed (canceled)."),
     ;
 
-    private String value;
-    BinanceTimeInForce(final String value) {
-        this.value = value;
+    private String description;
+
+    BinanceTimeInForce(final String description) {
+        this.description = description;
     }
 
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return this.getValue();
+    public String getDescription() {
+        return description;
     }
 
 }

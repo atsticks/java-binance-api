@@ -30,11 +30,12 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(of = {"symbol", "orderId", "transactionTime"})
-public class BinanceNewOrder {
-    public String symbol;
-    public Long orderId;
-    public Long orderListId;
-    public String clientOrderId;
-    public Long transactTime;
-    public boolean test;
+public class BinanceOrderRef {
+    String symbol;
+    BinanceOrderPlacement placement;
+    Long orderId;
+    Long orderListId;
+    String clientOrderId;
+    Long transactTime;
+    boolean test;
 }

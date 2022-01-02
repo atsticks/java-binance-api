@@ -374,6 +374,7 @@ public class BinanceApi {
     /**
      * Get the current available spot tickers.
      *
+     * @param symbol the price symbol.
      * @return result in JSON
      * @throws BinanceApiException in case of any error
      */
@@ -1162,6 +1163,45 @@ public class BinanceApi {
         return getTrades(symbol, 500);
     }
 
+
+    /**
+     * Get order status and details.
+     *
+     * @param orderRef the order reference as returned by {@link #createOrder(BinanceOrderPlacement)} , required.
+     * @return BinanceOrder object if successfull
+     * @throws BinanceApiException in case of any error
+     */
+    public BinanceOrder getOrder(BinanceOrderRef orderRef){
+        if(orderRef.isTest()){
+            BinanceOrder order = new BinanceOrder();
+            order.setOrderId(orderRef.getOrderId());
+            order.setSymbol(orderRef.getSymbol());
+            order.setClientOrderId(orderRef.getClientOrderId());
+            order.setPrice(order.getPrice());
+            order.setTime(orderRef.getTransactTime());
+            order.setStatus(BinanceOrderStatus.NEW);
+            if(orderRef.getPlacement()!=null) {
+                order.setTimeInForce(orderRef.getPlacement().getTimeInForce());
+                order.setIcebergQty(orderRef.getPlacement().getIcebergQty());
+                order.setStopPrice(orderRef.getPlacement().getStopPrice());
+                order.setOrigQty(orderRef.getPlacement().getQuantity());
+                order.setExecutedQty(orderRef.getPlacement().getQuantity());
+                order.setSide(orderRef.getPlacement().getSide());
+                order.setType(orderRef.getPlacement().getType());
+            }else{
+                order.setTimeInForce(BinanceTimeInForce.GTC);
+                order.setType(BinanceOrderType.MARKET);
+            }
+            return order;
+        }
+        BinanceOrderRequest request = BinanceOrderRequest.builder()
+                .orderId(orderRef.getOrderId())
+                .symbol(orderRef.getSymbol())
+                .build();
+        return getOrder(request);
+    }
+
+
     /**
      * Get order status and details.
      *
@@ -1194,14 +1234,16 @@ public class BinanceApi {
      * @return json result from order placement
      * @throws BinanceApiException in case of any error
      */
-    public BinanceNewOrder createOrder(BinanceOrderPlacement orderPlacement)  throws BinanceApiException {
+    public BinanceOrderRef createOrder(BinanceOrderPlacement orderPlacement)  throws BinanceApiException {
         try{
             maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/order?" + orderPlacement.getAsQuery();
             String lastResponse = new BinanceRequest(u)
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).post().read().getLastResponse();
-            return (new Gson()).fromJson(lastResponse, BinanceNewOrder.class);
+            BinanceOrderRef newOrder = (new Gson()).fromJson(lastResponse, BinanceOrderRef.class);
+            newOrder.setPlacement(orderPlacement);
+            return newOrder;
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{
@@ -1215,14 +1257,27 @@ public class BinanceApi {
      * @return json result from order placement
      * @throws BinanceApiException in case of any error
      */
-    public BinanceNewOrder testOrder(BinanceOrderPlacement orderPlacement)  throws BinanceApiException {
+    public BinanceOrderRef createTestOrder(BinanceOrderPlacement orderPlacement)  throws BinanceApiException {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
             String u = baseUrl + "v3/order/test?" + orderPlacement.getAsQuery();
             String lastResponse = new BinanceRequest(u)
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).post().read().getLastResponse();
-            return (new Gson()).fromJson(lastResponse, BinanceNewOrder.class);
+            BinanceOrderRef newOrder;
+            if(lastResponse.equals("{}")){
+                newOrder = new BinanceOrderRef();
+                newOrder.setPlacement(orderPlacement);
+                newOrder.setOrderId(System.currentTimeMillis());
+                newOrder.setTest(true);
+                newOrder.setClientOrderId(orderPlacement.getNewClientOrderId());
+                newOrder.setSymbol(orderPlacement.getSymbol());
+                newOrder.setTransactTime(System.currentTimeMillis());
+                return newOrder;
+            }
+            newOrder = (new Gson()).fromJson(lastResponse, BinanceOrderRef.class);
+            newOrder.setPlacement(orderPlacement);
+            return newOrder;
         }catch(InterruptedException e){
             throw new BinanceApiException(e.toString());
         }finally{

@@ -31,18 +31,19 @@ import com.google.common.net.UrlEscapers;
 import com.webcerebrium.binance.api.BinanceApiException;
 import lombok.*;
 
-import java.util.Objects;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 
 @Data
 @RequiredArgsConstructor
 public class BinanceOrderPlacement {
     @NonNull
-    public String symbol;
+    String symbol;
     @NonNull
     BinanceOrderSide side;
     BinanceOrderType type = BinanceOrderType.LIMIT;
-    BinanceTimeInForce timeInForce = BinanceTimeInForce.GOOD_TILL_CANCELLED;
+    BinanceTimeInForce timeInForce = BinanceTimeInForce.GTC;
     Double quantity;
     Double quoteOrderQty;
     Double price;
@@ -51,6 +52,11 @@ public class BinanceOrderPlacement {
     Double icebergQty;
     Long recvWindow;
 
+    private ThreadLocal<NumberFormat> qtyFormat = ThreadLocal.withInitial(() -> {
+        NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
+        nf.setMaximumFractionDigits(3);
+        return nf;
+    });
 
     public String getAsQuery() throws BinanceApiException {
         StringBuffer sb = new StringBuffer();
@@ -133,13 +139,20 @@ public class BinanceOrderPlacement {
         sb.append("&side=").append(side.name());
         sb.append("&type=").append(type.name());
         if (timeInForce != null) {
-            sb.append("&timeInForce=").append(timeInForce.name());
+            switch(type){
+                case LIMIT:
+                case STOP_LOSS_LIMIT:
+                case TAKE_PROFIT_LIMIT:
+                    sb.append("&timeInForce=").append(timeInForce.name());
+                    break;
+            }
+
         }
         if (quantity != null) {
-            sb.append("&quantity=").append(quantity);
+            sb.append("&quantity=").append(formatQuantity(quantity));
         }
         if (quoteOrderQty != null) {
-            sb.append("&quoteOrderQty=").append(quoteOrderQty);
+            sb.append("&quoteOrderQty=").append(formatQuantity(quoteOrderQty));
         }
         if(price !=null){
             sb.append("&price=").append(price);
@@ -151,11 +164,15 @@ public class BinanceOrderPlacement {
             sb.append("&stopPrice=").append(stopPrice.toString());
         }
         if (icebergQty != null) {
-            sb.append("&icebergQty=").append(icebergQty.toString());
+            sb.append("&icebergQty=").append(formatQuantity(icebergQty));
         }
         if(recvWindow !=null){
             sb.append("&recvWindow=").append(recvWindow);
         }
         return sb.toString().substring(1); // skipping the first &
+    }
+
+    private String formatQuantity(double qty) {
+        return this.qtyFormat.get().format(qty);
     }
 }

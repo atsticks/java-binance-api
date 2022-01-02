@@ -10,7 +10,6 @@ package com.webcerebrium.binance.api;
 
 // This class contains tests for trading. Take it wisely
 
-import com.google.gson.JsonObject;
 import com.webcerebrium.binance.datatype.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
@@ -88,13 +87,13 @@ public class TradingTest {
     public void testOrderWithoutPlacing() throws BinanceApiException {
         if (canTrade) {
             BinanceOrderPlacement placement = new BinanceOrderPlacement(symbol, BinanceOrderSide.SELL);
-            placement.setTimeInForce(BinanceTimeInForce.GOOD_TILL_CANCELLED);
+            placement.setTimeInForce(BinanceTimeInForce.GTC);
             placement.setPrice(1d);
 
             Double qty = Double.valueOf(walletAsset.getFree().longValue()); // so we could tes ton BNB
             if (qty.compareTo(0d) > 0) {
                 placement.setQuantity(qty); // sell some our asset for 1 BTC each
-                log.info("Order Test = {}", binanceApi.testOrder(placement));
+                log.info("Order Test = {}", binanceApi.createTestOrder(placement));
             }
         }
     }
@@ -108,7 +107,7 @@ public class TradingTest {
             Double qty = 1.0; // so we want to buy exactly 1 BNB
             if (qty.compareTo(0d) > 0) {
                 placement.setQuantity(qty); // sell some our asset for 1 BTC each
-                log.info("Market Order Test = {}", binanceApi.testOrder(placement));
+                log.info("Market Order Test = {}", binanceApi.createTestOrder(placement));
             }
         }
     }
@@ -117,17 +116,17 @@ public class TradingTest {
     public void testPlacingCheckingLimitOrder() throws Exception, BinanceApiException {
         if (canTrade) {
             BinanceOrderPlacement placement = new BinanceOrderPlacement(symbol, BinanceOrderSide.SELL);
-            placement.setTimeInForce(BinanceTimeInForce.GOOD_TILL_CANCELLED);
+            placement.setTimeInForce(BinanceTimeInForce.GTC);
             placement.setType(BinanceOrderType.LIMIT);
             placement.setPrice(1d);
 
             Double qty = Double.valueOf(walletAsset.getFree().longValue());
             if (qty.compareTo(0d) > 0) {
                 placement.setQuantity(qty); // sell some of our asset for 1 BTC each
-                BinanceNewOrder jsonObject = binanceApi.createOrder(placement);
-                log.info("Order Placement = {}", jsonObject.toString());
+                BinanceOrderRef orderRef = binanceApi.createOrder(placement);
+                log.info("Order Placement = {}", orderRef.toString());
                 order = binanceApi.getOrder(BinanceOrderRequest.builder()
-                        .orderId(jsonObject.getOrderId())
+                        .orderId(orderRef.getOrderId())
                         .symbol(symbol).build());
                 System.out.println(order);
             }
