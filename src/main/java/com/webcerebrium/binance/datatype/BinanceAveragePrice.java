@@ -61,17 +61,4 @@ public final class BinanceAveragePrice implements Comparable<BinanceAveragePrice
         return price.compareTo(o.price);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        BinanceAveragePrice asset = (BinanceAveragePrice) o;
-        return name.equals(asset.name);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name);
-    }
-
 }

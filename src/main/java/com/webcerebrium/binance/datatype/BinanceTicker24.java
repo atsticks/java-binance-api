@@ -36,7 +36,7 @@ import java.util.Objects;
 
 @Data
 @EqualsAndHashCode(of = {"symbol", "openTime"})
-public final class BinanceTicker24 {
+public final class BinanceTicker24 implements Comparable<BinanceTicker24>{
     private String symbol;
     private Double priceChange;
     private Double priceChangePercent;
@@ -93,6 +93,11 @@ public final class BinanceTicker24 {
     @Override
     public int hashCode() {
         return Objects.hash(symbol, openTime, closeTime);
+    }
+
+    @Override
+    public int compareTo(BinanceTicker24 o) {
+        return getSymbol().compareTo(o.getSymbol());
     }
 
 }

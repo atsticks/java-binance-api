@@ -40,7 +40,7 @@ import lombok.*;
 @Data
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = {"symbol", "timestamp"})
-public class BinanceTicker {
+public class BinanceTicker implements Comparable<BinanceTicker>{
     @NonNull
     String symbol;
     Double bidPrice = null;
@@ -58,4 +58,8 @@ public class BinanceTicker {
         bidQty = ob.get("bidQty").getAsDouble();
     }
 
+    @Override
+    public int compareTo(BinanceTicker o) {
+        return getSymbol().compareTo(o.getSymbol());
+    }
 }
