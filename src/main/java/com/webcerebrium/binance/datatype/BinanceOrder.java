@@ -43,6 +43,7 @@ package com.webcerebrium.binance.datatype;
  }
  */
 
+import com.google.gson.JsonObject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -63,4 +64,19 @@ public class BinanceOrder {
     public Double stopPrice;
     public Double icebergQty;
     public Long time;
+    public boolean test;
+
+    public BinanceOrder(){}
+
+    public BinanceOrder(JsonObject ob){
+        symbol = ob.get("symbol").getAsString();
+        if(ob.get("origClientOrderId")!=null)
+            clientOrderId = ob.get("origClientOrderId").getAsString();
+        if(ob.get("clientOrderId")!=null)
+            clientOrderId = ob.get("clientOrderId").getAsString();
+        status = BinanceOrderStatus.valueOf(ob.get("status").getAsString());
+        timeInForce = BinanceTimeInForce.valueOf(ob.get("timeInForce").getAsString());
+        type = BinanceOrderType.valueOf(ob.get("type").getAsString());
+        side = BinanceOrderSide.valueOf(ob.get("side").getAsString());
+    }
 }

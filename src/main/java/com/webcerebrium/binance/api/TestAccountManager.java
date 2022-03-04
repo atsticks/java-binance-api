@@ -23,29 +23,21 @@
  * SOFTWARE.
  */
 
-package com.webcerebrium.binance.datatype;
+package com.webcerebrium.binance.api;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import com.webcerebrium.binance.datatype.BinanceAccount;
 
-@Data
-@EqualsAndHashCode(of = {"symbol", "orderId", "transactionTime"})
-public class BinanceOrderRef {
-    String symbol;
-    BinanceOrderPlacement placement;
-    Long orderId;
-    Long orderListId;
-    String clientOrderId;
-    Long transactTime;
-    boolean test;
+import java.util.Objects;
 
-    public BinanceOrderRef(){}
+public class TestAccountManager {
 
-    public BinanceOrderRef(BinanceOrder order) {
-        this.setOrderId(order.getOrderId());
-        this.setClientOrderId(order.getClientOrderId());
-        this.setSymbol(order.getSymbol());
-        this.setOrderListId(1L);
-        this.setTransactTime(order.getTime());
+    private BinanceAccount account;
+
+    public void initAccount(BinanceAccount account) {
+        this.account = Objects.requireNonNull(account);
+    }
+
+    public BinanceAccount getAccount() {
+        return account;
     }
 }
