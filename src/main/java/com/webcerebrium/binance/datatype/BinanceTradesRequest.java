@@ -27,12 +27,11 @@ package com.webcerebrium.binance.datatype;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 
 @Data
 @Builder
-public class BinanceMyTradesRequest {
+public class BinanceTradesRequest {
     /** The symbol, required. */
     @NonNull
     String symbol;

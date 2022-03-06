@@ -14,7 +14,7 @@ public class AccountHistoryTest {
 
     @Before
     public void setUp() throws Exception, BinanceApiException {
-        binanceApi = new BinanceApi();
+        binanceApi = new BinanceApiDefault();
     }
 
     @Test

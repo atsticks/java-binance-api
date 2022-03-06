@@ -25,30 +25,13 @@
 
 package com.webcerebrium.binance.api;
 
-import com.google.common.base.Strings;
-import com.google.common.escape.Escaper;
-import com.google.common.net.UrlEscapers;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 import com.webcerebrium.binance.datatype.*;
 import com.webcerebrium.binance.websocket.*;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
-import org.eclipse.jetty.websocket.client.WebSocketClient;
 
-import java.lang.reflect.Type;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 
 public interface BinanceApi {
@@ -371,7 +354,7 @@ public interface BinanceApi {
      * @return list of trades
      * @throws BinanceApiException in case of any error
      */
-    List<BinanceTrade> getMyTrades(BinanceMyTradesRequest request) throws BinanceApiException;
+    List<BinanceTrade> getMyTrades(BinanceTradesRequest request) throws BinanceApiException;
 
     /**
      * Get trades for a specific symbol.
@@ -448,7 +431,7 @@ public interface BinanceApi {
      * @return json result
      * @throws BinanceApiException in case of any error
      */
-    BinanceOrder deleteOrderByClientId(String symbol, String origClientOrderId) throws BinanceApiException;
+    BinanceOrder deleteOrderByClientOrderId(String symbol, String origClientOrderId) throws BinanceApiException;
 
     /**`
      * Deletes order by BinanceOrder object

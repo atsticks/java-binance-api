@@ -32,7 +32,7 @@ public class TradingTest {
 
     @Before
     public void setUp() throws BinanceApiException {
-        binanceApi = new BinanceApi();
+        binanceApi = new BinanceApiDefault();
         asset = "BNB";
         symbol = asset + "BTC";
         order = null;
@@ -46,8 +46,8 @@ public class TradingTest {
     public void tearDown() throws Exception {
         if (order != null) {
             try {
-                BinanceDeletedOrder jsonObject = binanceApi.deleteOrder(order);
-                log.info("Deleted order = {}", jsonObject.toString());
+                BinanceOrder order = binanceApi.deleteOrder(this.order);
+                log.info("Deleted order = {}", order.toString());
             } catch (BinanceApiException e) {
                 log.info("Order clean up (non-critical) exception = {}", e.toString());
             }

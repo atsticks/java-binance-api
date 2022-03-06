@@ -24,7 +24,7 @@ public class GeneralEndpointsTest {
 
     @Before
     public void setUp() throws Exception, BinanceApiException {
-        binanceApi = new BinanceApi();
+        binanceApi = new BinanceApiDefault();
     }
 
     @Test

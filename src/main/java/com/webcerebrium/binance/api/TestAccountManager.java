@@ -25,19 +25,104 @@
 
 package com.webcerebrium.binance.api;
 
-import com.webcerebrium.binance.datatype.BinanceAccount;
+import com.webcerebrium.binance.datatype.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
 
+@Slf4j
 public class TestAccountManager {
 
+    private BinanceApiDefault defaultApi;
     private BinanceAccount account;
+    private BinanceExchangeInfo exchangeInfo;
 
-    public void initAccount(BinanceAccount account) {
-        this.account = Objects.requireNonNull(account);
+    public void initAccount(BinanceApiDefault defaultApi) {
+        this.defaultApi = Objects.requireNonNull(defaultApi);
+        initService();
     }
 
-    public BinanceAccount getAccount() {
+    private void initService() {
+        account = defaultApi.getAccount();
+        exchangeInfo = defaultApi.getExchangeInfo();
+    }
+
+    public BinanceAccount getAccount()throws BinanceApiException {
         return account;
+    }
+
+    public BinanceTrade adaptBalance(BinanceOrder order) throws BinanceApiException{
+        String symbol = order.getSymbol();
+        BinanceExchangeSymbol exchangeData = exchangeInfo.getSymbol(symbol);
+        String baseCoin = exchangeData.getBaseAsset();
+        String targetCoin = exchangeData.getQuoteAsset();
+        BinanceAsset baseAsset = account.getAsset(baseCoin);
+        BinanceAsset targetAsset = account.getAsset(targetCoin);
+        if(baseAsset == null){
+            throw new BinanceApiException("Unknown base coin: " + baseCoin + " in symbol " + symbol);
+        }
+        if(targetAsset == null){
+            throw new BinanceApiException("Unknown target coin: " + targetCoin + " in symbol " + symbol);
+        }
+        BinanceTrade trade = new BinanceTrade();
+        trade.setTime(System.currentTimeMillis());
+        trade.setBestMatch(true);
+        switch(order.getSide()){
+            case BUY:
+                double amount = order.getOrigQty();
+                double commission = amount *0.001;
+                trade.setBuyer(true);
+                trade.setCommission(amount*0.001);
+                trade.setCommissionAsset(baseCoin);
+                if(baseAsset.getFree()<(amount+commission)){
+                    throw new BinanceApiException("Not enough balance on " + baseCoin + ", required: " + amount + ", available: " + baseAsset.getFree());
+                }
+                baseAsset.setFree(baseAsset.getFree()-amount);
+                baseAsset.setFree(baseAsset.getFree()-commission);
+                targetAsset.setFree(targetAsset.getFree()-amount * order.getPrice());
+                log.info("New free balance " + baseCoin + " " + baseAsset.getFree());
+                log.info("New free balance " + targetCoin + " " + targetAsset.getFree());
+                order.setExecutedQty(amount);
+                order.setStatus(BinanceOrderStatus.FILLED);
+                break;
+            case SELL:
+                amount = order.getOrigQty();
+                double targetAmount = amount * order.getPrice();
+                commission = targetAmount*0.001;
+                trade.setCommission(commission);
+                trade.setCommissionAsset(targetCoin);
+                trade.setBuyer(false);
+                trade.setCommissionAsset(targetCoin);
+                if(targetAsset.getFree()<(targetAmount+commission)){
+                    throw new BinanceApiException("Not enough balance on " + baseCoin + ", required: " + amount + ", available: " + baseAsset.getFree());
+                }
+                targetAsset.setFree(targetAsset.getFree()-targetAmount);
+                targetAsset.setFree(targetAsset.getFree()-commission);
+                baseAsset.setFree(baseAsset.getFree()+amount);
+                log.info("New free balance " + baseCoin + " " + baseAsset.getFree());
+                log.info("New free balance " + targetCoin + " " + targetAsset.getFree());
+                order.setExecutedQty(amount);
+                order.setStatus(BinanceOrderStatus.FILLED);
+                break;
+        }
+        trade.setQty(order.getExecutedQty());
+        return trade;
+    }
+
+    public void adaptBalance(BinanceWithdrawOrder order) {
+        BinanceAsset asset = account.getAsset(order.getCoin());
+        if(asset!=null){
+            if(asset.getFree()<order.getAmount()){
+                throw new BinanceApiException("Insufficient fiat balance for " + asset.getName() + ", required: " + order.getAmount() + ", free: " + asset.getFree());
+            }
+            asset.setFree(asset.getFree()-order.getAmount());
+        }
+    }
+
+    public void adaptBalance(BinanceFiatPayment order) {
+        BinanceAsset asset = account.getAsset(order.getCryptoCurrency());
+        if(asset!=null){
+            asset.setFree(asset.getFree()+order.getObtainAmount());
+        }
     }
 }

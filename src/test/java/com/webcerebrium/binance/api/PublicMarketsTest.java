@@ -21,7 +21,7 @@ public class PublicMarketsTest {
 
     @Before
     public void setUp() throws Exception {
-        binanceApi = new BinanceApi();
+        binanceApi = new BinanceApiDefault();
     }
 
     @Test

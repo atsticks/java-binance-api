@@ -29,7 +29,7 @@ public class AccountInfoTest {
 
     @Before
     public void setUp() throws Exception, BinanceApiException {
-        binanceApi = new BinanceApi();
+        binanceApi = new BinanceApiDefault();
         symbol = "BNBBTC";
     }
 
