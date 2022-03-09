@@ -53,16 +53,16 @@ public class BinanceApiSimulator implements BinanceApi{
 
     public BinanceApiSimulator(BinanceApiDefault defaultApi) throws BinanceApiException {
         this.defaultApi = Objects.requireNonNull(defaultApi);
-        testAccountManager = new TestAccountManager();
-        testOrderManager = new TestOrderManager(testAccountManager);
-        depositManager = new TestDepositManager(testAccountManager);
+        this.testAccountManager = new TestAccountManager();
+        this.testOrderManager = new TestOrderManager(testAccountManager);
+        this.depositManager = new TestDepositManager(testAccountManager);
     }
 
     public void initialize(){
         BinanceAccount account = getAccount();
-        testAccountManager.initAccount(defaultApi);
-        testOrderManager.init();
-        depositManager.initDeposits();
+        this.testAccountManager.initAccount(defaultApi);
+        this.testOrderManager.init();
+        this.depositManager.initDeposits();
     }
 
     @Override
