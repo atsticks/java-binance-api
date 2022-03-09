@@ -23,12 +23,12 @@ public class TestDepositManager {
     }
 
     public void initDeposits(){
-        fiatOrders.addAll(defaultApi.getFiatOrders(BinanceFiatOrderRequest.builder()
-                .rows(50)
-                .build()));
-        fiatPayments.addAll(defaultApi.getFiatPayments(BinanceFiatOrderRequest.builder()
-                .rows(50)
-                .build()));
+//        fiatOrders.addAll(defaultApi.getFiatOrders(BinanceFiatOrderRequest.builder()
+//                .rows(50)
+//                .build()));
+//        fiatPayments.addAll(defaultApi.getFiatPayments(BinanceFiatOrderRequest.builder()
+//                .rows(50)
+//                .build()));
     }
 
     public List<BinanceFiatPayment> getFiatPayments(BinanceFiatOrderRequest request) {
