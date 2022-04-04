@@ -48,7 +48,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(of = {"symbol", "eventTime", "aggregatedTradeId"})
-public class BinanceEventAggTrade {
+public class BinanceEventAggTrade implements HasSymbol{
     public Long eventTime;
     public String symbol;
     public Long aggregatedTradeId;

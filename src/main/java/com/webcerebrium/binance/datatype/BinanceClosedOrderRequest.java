@@ -30,7 +30,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class BinanceClosedOrderRequest {
+public class BinanceClosedOrderRequest implements HasSymbol{
     /** start time in Milliseconds. */
     Long start;
     /** end time in Milliseconds */

@@ -67,7 +67,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(of = {"symbol", "eventTime", "orderId", "tradeId"})
-public class BinanceEventExecutionReport {
+public class BinanceEventExecutionReport implements HasSymbol{
 
     public Long eventTime;
     public String symbol;

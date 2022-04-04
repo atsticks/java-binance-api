@@ -69,7 +69,7 @@ import java.util.List;
  */
 @Data
 @EqualsAndHashCode(of = {"symbol", "eventTime", "updateId"})
-public class BinanceEventDepthUpdate {
+public class BinanceEventDepthUpdate implements HasSymbol{
     public Long eventTime;
     public String symbol;
     public Long updateId;

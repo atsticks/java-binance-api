@@ -38,7 +38,7 @@ import java.util.Set;
 @Data
 @Slf4j
 @EqualsAndHashCode(of = {"symbol", "lastAggTradeId"})
-public class BinanceExchangeProduct {
+public class BinanceExchangeProduct implements HasSymbol{
     boolean active;
     Double activeBuy;
     Double activeSell;

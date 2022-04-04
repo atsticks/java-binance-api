@@ -33,7 +33,7 @@ import lombok.RequiredArgsConstructor;
 @Data
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = {"symbol", "timestamp"})
-public class BinanceDepth {
+public class BinanceDepth implements HasSymbol{
 
     @NonNull
     String symbol;

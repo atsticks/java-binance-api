@@ -31,7 +31,7 @@ import lombok.NonNull;
 
 @Data
 @Builder
-public class BinanceOrderRequest {
+public class BinanceOrderRequest implements HasSymbol{
     @NonNull
     String symbol;
     Long orderId;

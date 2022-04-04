@@ -40,7 +40,7 @@ import lombok.*;
 @Data
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = {"symbol", "timestamp"})
-public class BinanceTicker implements Comparable<BinanceTicker>{
+public class BinanceTicker implements Comparable<BinanceTicker>, HasSymbol{
     @NonNull
     String symbol;
     Double bidPrice = null;

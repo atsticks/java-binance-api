@@ -31,7 +31,7 @@ import lombok.NonNull;
 
 @Data
 @Builder
-public class BinanceTradesRequest {
+public class BinanceTradesRequest implements HasSymbol{
     /** The symbol, required. */
     @NonNull
     String symbol;

@@ -48,7 +48,7 @@ import java.util.*;
 @Data
 @Slf4j
 @EqualsAndHashCode(of = {"serverTime", "timezone"})
-public class BinanceExchangeInfo {
+public class BinanceExchangeInfo{
     String timezone = null;
     Long serverTime = 0L;
     List<BinanceRateLimit> rateLimits = new LinkedList<>();

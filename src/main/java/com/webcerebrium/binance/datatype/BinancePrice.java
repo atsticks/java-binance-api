@@ -33,7 +33,7 @@ import java.util.Objects;
 @Data
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = {"symbol", "timestamp"})
-public final class BinancePrice {
+public final class BinancePrice implements HasSymbol{
     @NonNull
     private String symbol;
     private Double value;

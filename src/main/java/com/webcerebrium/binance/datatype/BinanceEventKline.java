@@ -62,7 +62,7 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @Slf4j
 @EqualsAndHashCode(of = {"symbol", "eventTime", "interval", "startTime"})
-public class BinanceEventKline {
+public class BinanceEventKline implements HasSymbol{
     public Long eventTime;
     public String symbol;
     public BinanceInterval interval;
