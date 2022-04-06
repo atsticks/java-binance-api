@@ -68,5 +68,12 @@ public class BinancePair {
         this.symbol = Objects.requireNonNull(symbol);
     }
 
+    public BinancePair(String baseSymbol, String quoteSymbol, BinancePairType type) {
+        this.pairType = Objects.requireNonNull(type);
+        this.baseSymbol = Objects.requireNonNull(baseSymbol);
+        this.quoteSymbol = Objects.requireNonNull(quoteSymbol);
+        this.symbol = baseSymbol + quoteSymbol;
+    }
+
 
 }
