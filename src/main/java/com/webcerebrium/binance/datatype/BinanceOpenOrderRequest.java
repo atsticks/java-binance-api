@@ -50,7 +50,7 @@ total number required, 0 for not required and 1 for required; default not requir
      */
 @Data
 @Builder
-public class BinanceOpenOrderRequest {
+public class BinanceOpenOrderRequest implements HasSymbol{
     /** the owner address. */
     String address;
     /** limit, default 500; max 1000.*/

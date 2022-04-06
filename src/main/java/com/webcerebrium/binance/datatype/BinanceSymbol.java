@@ -31,6 +31,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.lang.reflect.Method;
+import java.util.Objects;
+
 public final class BinanceSymbol {
 
 //    private String symbol = "";
@@ -51,22 +54,6 @@ public final class BinanceSymbol {
         return symbol.replace("_", "").replace("-", "").toUpperCase();
     }
 
-
-    public static String BTC(String pair) throws BinanceApiException {
-       return normalize(pair.toUpperCase() + "BTC");
-    }
-
-    public static String ETH(String pair) throws BinanceApiException {
-       return normalize(pair.toUpperCase() + "ETH");
-    }
-
-    public static String BNB(String pair) throws BinanceApiException {
-        return normalize(pair.toUpperCase() + "BNB");
-    }
-    public static String USDT(String pair) throws BinanceApiException {
-       return normalize(pair.toUpperCase() + "USDT");
-    }
-
     public static boolean contains(String symbol, String coin) {
         return (symbol.endsWith(coin.toUpperCase())) || (symbol.startsWith(coin.toUpperCase()));
     }
@@ -78,6 +65,22 @@ public final class BinanceSymbol {
         if (symbol.endsWith(coin)) {
             int index = symbol.length() - (coin).length();
             return symbol.substring(0, index);
+        }
+        return "";
+    }
+
+    public static String getSymbol(Object o){
+        Objects.requireNonNull(o);
+        if(o instanceof HasSymbol)
+            return ((HasSymbol)o).getSymbol();
+        Class type = o.getClass();
+        try {
+            Method getter = type.getMethod("getSymbol");
+            if (getter != null) {
+                return (String) getter.invoke(o);
+            }
+        }catch(Exception e){
+            System.out.println("Failed to evaluate symbol from: " + o);
         }
         return "";
     }

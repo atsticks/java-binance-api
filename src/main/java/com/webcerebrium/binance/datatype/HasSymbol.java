@@ -22,26 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package com.webcerebrium.binance.datatype;
 
-import lombok.Builder;
-import lombok.Data;
+/**
+ * Simple interface to get the symbol of an item.
+ */
+public interface HasSymbol {
 
-@Data
-@Builder
-public class BinanceDeleteOrderRequest implements HasSymbol{
-    /** The symbol. */
-    String symbol;
-    Integer recvWindow = 5000;
-    long timestamp = System.currentTimeMillis();
-
-    public String toQueryString(){
-        String result = "?symbol="+symbol;
-        result += "&timestamp="+timestamp;
-        if(recvWindow!=null){
-            result += "&recvWindow="+recvWindow;
-        }
-        return result;
-    }
+    String getSymbol();
 }

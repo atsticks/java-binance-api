@@ -34,7 +34,7 @@ import java.util.Objects;
 
 @Data
 @EqualsAndHashCode(of = {"symbol", "pairType"})
-public class BinancePair {
+public class BinancePair implements HasSymbol{
 
     public enum BinancePairType{
         spot,
@@ -53,6 +53,7 @@ public class BinancePair {
     boolean marginTrade;
 
 
+    @Deprecated
     public BinancePair(JsonObject ob, BinancePairType type) {
         symbol = ob.get("symbol").getAsString();
         baseSymbol = ob.get("base").getAsString();
@@ -63,6 +64,7 @@ public class BinancePair {
         pairType = Objects.requireNonNull(type);
     }
 
+    @Deprecated
     public BinancePair(String symbol, BinancePairType type) {
         this.pairType = Objects.requireNonNull(type);
         this.symbol = Objects.requireNonNull(symbol);

@@ -61,7 +61,7 @@ import java.util.concurrent.TimeUnit;
 
 @Data
 @EqualsAndHashCode(of = {"symbol", "interval", "openTime"})
-public class BinanceCandlestick implements Comparable<BinanceCandlestick> {
+public class BinanceCandlestick implements Comparable<BinanceCandlestick>, HasSymbol {
     String symbol;
     BinanceInterval interval;
     Long openTime = null;

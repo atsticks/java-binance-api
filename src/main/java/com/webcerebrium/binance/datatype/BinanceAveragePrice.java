@@ -34,7 +34,7 @@ import java.util.Objects;
 @Data
 @EqualsAndHashCode(of = {"name", "timestamp"})
 @RequiredArgsConstructor
-public final class BinanceAveragePrice implements Comparable<BinanceAveragePrice> {
+public final class BinanceAveragePrice implements Comparable<BinanceAveragePrice>, HasSymbol{
     @NonNull
     private String name;
     private Double price;
@@ -61,4 +61,8 @@ public final class BinanceAveragePrice implements Comparable<BinanceAveragePrice
         return price.compareTo(o.price);
     }
 
+    @Override
+    public String getSymbol() {
+        return name;
+    }
 }

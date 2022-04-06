@@ -30,7 +30,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(of = {"symbol", "orderId", "transactionTime"})
-public class BinanceOrderRef {
+public class BinanceOrderRef implements HasSymbol{
     String symbol;
     BinanceOrderPlacement placement;
     Long orderId;

@@ -32,7 +32,7 @@ import lombok.Setter;
 
 @Data
 @Builder
-public class CandlestickBarRequest {
+public class CandlestickBarRequest implements HasSymbol{
 
     @NonNull
     String symbol;

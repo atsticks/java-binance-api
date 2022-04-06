@@ -37,7 +37,7 @@ import java.util.Locale;
 
 @Data
 @RequiredArgsConstructor
-public class BinanceOrderPlacement {
+public class BinanceOrderPlacement implements HasSymbol{
     @NonNull
     String symbol;
     @NonNull

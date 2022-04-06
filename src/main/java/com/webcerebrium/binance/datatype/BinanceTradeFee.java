@@ -30,7 +30,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(of = {"symbol", "timestamp"})
-public class BinanceTradeFee {
+public class BinanceTradeFee implements HasSymbol{
 
     String symbol;
     Double makerCommission;

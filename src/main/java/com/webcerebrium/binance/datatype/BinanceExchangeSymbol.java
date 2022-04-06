@@ -57,7 +57,7 @@ import java.util.*;
 @Slf4j
 @Data
 @EqualsAndHashCode(of = {"symbol"})
-public class BinanceExchangeSymbol {
+public class BinanceExchangeSymbol implements HasSymbol{
 
     String symbol;
     String status;
