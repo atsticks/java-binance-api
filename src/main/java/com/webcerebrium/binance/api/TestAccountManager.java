@@ -39,19 +39,27 @@ public class TestAccountManager {
 
     public void initAccount(BinanceApiDefault defaultApi) {
         this.defaultApi = Objects.requireNonNull(defaultApi);
-        initService();
+        checkService();
     }
 
-    private void initService() {
-        account = defaultApi.getAccount();
-        exchangeInfo = defaultApi.getExchangeInfo();
+    private void checkService() {
+        try {
+            if(account==null)
+                account = defaultApi.getAccount();
+            if(exchangeInfo==null)
+                exchangeInfo = defaultApi.getExchangeInfo();
+        }catch(Exception e){
+            log.error("Error initializing account manager.", e);
+        }
     }
 
     public BinanceAccount getAccount()throws BinanceApiException {
+        checkService();
         return account;
     }
 
     public BinanceTrade adaptBalance(BinanceOrder order) throws BinanceApiException{
+        checkService();
         String symbol = order.getSymbol();
         BinanceExchangeSymbol exchangeData = exchangeInfo.getSymbol(symbol);
         String baseCoin = exchangeData.getBaseAsset();
@@ -110,6 +118,7 @@ public class TestAccountManager {
     }
 
     public void adaptBalance(BinanceWithdrawOrder order) {
+        checkService();
         BinanceAsset asset = account.getAsset(order.getCoin());
         if(asset!=null){
             if(asset.getFree()<order.getAmount()){
@@ -120,6 +129,7 @@ public class TestAccountManager {
     }
 
     public void adaptBalance(BinanceFiatPayment order) {
+        checkService();
         BinanceAsset asset = account.getAsset(order.getCryptoCurrency());
         if(asset!=null){
             asset.setFree(asset.getFree()+order.getObtainAmount());
