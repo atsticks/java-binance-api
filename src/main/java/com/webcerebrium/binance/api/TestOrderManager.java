@@ -49,9 +49,6 @@ public class TestOrderManager {
         this.testAccountManager = Objects.requireNonNull(testAccountManager);
     }
 
-    public void init() {
-    }
-
     public BinanceOrder getOrder(BinanceOrderRef orderRef) {
         return orders.stream().filter(o -> orderRef.getOrderId()==o.getOrderId()).findFirst().orElse(null);
     }

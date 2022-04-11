@@ -33,21 +33,21 @@ import java.util.Objects;
 @Slf4j
 public class TestAccountManager {
 
-    private BinanceApiDefault defaultApi;
+    private BinanceApi api;
     private BinanceAccount account;
     private BinanceExchangeInfo exchangeInfo;
 
-    public void initAccount(BinanceApiDefault defaultApi) {
-        this.defaultApi = Objects.requireNonNull(defaultApi);
+    public TestAccountManager(BinanceApi api){
+        this.api = Objects.requireNonNull(api);
         checkService();
     }
 
     private void checkService() {
         try {
             if(account==null)
-                account = defaultApi.getAccount();
+                account = api.getAccount();
             if(exchangeInfo==null)
-                exchangeInfo = defaultApi.getExchangeInfo();
+                exchangeInfo = api.getExchangeInfo();
         }catch(Exception e){
             log.error("Error initializing account manager.", e);
         }
