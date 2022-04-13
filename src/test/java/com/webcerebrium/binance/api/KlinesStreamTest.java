@@ -1,9 +1,8 @@
 package com.webcerebrium.binance.api;
 
-import com.webcerebrium.binance.datatype.BinanceEventKline;
-import com.webcerebrium.binance.datatype.BinanceInterval;
-import com.webcerebrium.binance.datatype.BinanceSymbol;
-import com.webcerebrium.binance.websocket.BinanceWebSocketAdapterKline;
+import com.webcerebrium.binance.datatype.events.CandlestickEvent;
+import com.webcerebrium.binance.datatype.Interval;
+import com.webcerebrium.binance.websocket.WebSocketCandlesticksAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.websocket.api.Session;
 import org.junit.Before;
@@ -12,20 +11,20 @@ import org.junit.Test;
 @Slf4j
 public class KlinesStreamTest {
 
-    private BinanceApi binanceApi = null;
+    private Api binanceApi = null;
     private String symbol = null;
 
     @Before
-    public void setUp() throws Exception, BinanceApiException {
-        binanceApi = new BinanceApiDefault();
+    public void setUp() throws Exception, ApiException {
+        binanceApi = new DefaultApi();
         symbol = "ETHBTC";
     }
 
     @Test
-    public void testKlinesStreamWatcher() throws Exception, BinanceApiException {
-        Session session = binanceApi.websocketKlines(symbol, BinanceInterval.ONE_MIN, new BinanceWebSocketAdapterKline() {
+    public void testKlinesStreamWatcher() throws Exception, ApiException {
+        Session session = binanceApi.websocketCandlesticks(symbol, Interval.ONE_MIN, new WebSocketCandlesticksAdapter() {
             @Override
-            public void onMessage(BinanceEventKline message) {
+            public void onMessage(CandlestickEvent message) {
                 log.info(message.toString());
             }
         });

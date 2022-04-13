@@ -1,6 +1,6 @@
 package com.webcerebrium.binance.api;
 
-import com.webcerebrium.binance.datatype.BinanceHistoryFilter;
+import com.webcerebrium.binance.datatype.HistoryFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,18 +10,18 @@ import java.util.Calendar;
 @Slf4j
 public class AccountHistoryTest {
 
-    private BinanceApi binanceApi = null;
+    private Api binanceApi = null;
 
     @Before
-    public void setUp() throws Exception, BinanceApiException {
-        binanceApi = new BinanceApiDefault();
+    public void setUp() throws Exception, ApiException {
+        binanceApi = new DefaultApi();
     }
 
     @Test
-    public void testAccountDepositHistory() throws Exception, BinanceApiException {
+    public void testAccountDepositHistory() throws Exception, ApiException {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.MONTH, -3);
-        BinanceHistoryFilter historyFilter = BinanceHistoryFilter.builder()
+        HistoryFilter historyFilter = HistoryFilter.builder()
                 .coin("ETH")
                 .startTime(cal.getTime().getTime()).build();
 
@@ -29,8 +29,8 @@ public class AccountHistoryTest {
     }
 
     @Test
-    public void testAccountWithdrawalHistory() throws Exception, BinanceApiException {
-        BinanceHistoryFilter historyFilter = BinanceHistoryFilter.builder()
+    public void testAccountWithdrawalHistory() throws Exception, ApiException {
+        HistoryFilter historyFilter = HistoryFilter.builder()
                 .coin("ETH").build();
         log.info("WITHDRAWALS={}", binanceApi.getWithdrawHistory(historyFilter));
     }
