@@ -12,27 +12,18 @@ import java.util.stream.Stream;
 public class TestDepositManager {
 
     private final TestAccountManager testAccountManager;
-    private List<BinanceFiatOrder> fiatOrders = new ArrayList<>();
-    private List<BinanceWithdrawTransaction> fiatWithdraws = new ArrayList<>();
-    private List<BinanceFiatPayment> fiatPayments = new ArrayList<>();
+    private List<FiatOrder> fiatOrders = new ArrayList<>();
+    private List<WithdrawTransaction> fiatWithdraws = new ArrayList<>();
+    private List<FiatPayment> fiatPayments = new ArrayList<>();
 
-    private BinanceApiDefault defaultApi;
+    private DefaultApi defaultApi;
 
     public TestDepositManager(TestAccountManager testAccountManager) {
         this.testAccountManager = Objects.requireNonNull(testAccountManager);
     }
 
-    public void initDeposits(){
-//        fiatOrders.addAll(defaultApi.getFiatOrders(BinanceFiatOrderRequest.builder()
-//                .rows(50)
-//                .build()));
-//        fiatPayments.addAll(defaultApi.getFiatPayments(BinanceFiatOrderRequest.builder()
-//                .rows(50)
-//                .build()));
-    }
-
-    public List<BinanceFiatPayment> getFiatPayments(BinanceFiatOrderRequest request) {
-        Stream<BinanceFiatPayment> stream = fiatPayments.stream();
+    public List<FiatPayment> getFiatPayments(FiatOrderRequest request) {
+        Stream<FiatPayment> stream = fiatPayments.stream();
         if(request.getBeginTime()!=null){
             stream.filter(b -> b.getCreateTime() >= request.getBeginTime());
         }
@@ -42,8 +33,8 @@ public class TestDepositManager {
         return stream.collect(Collectors.toList());
     }
 
-    public String withdraw(BinanceWithdrawOrder withdrawOrder) {
-        BinanceWithdrawTransaction ta = new BinanceWithdrawTransaction();
+    public String withdraw(WithdrawOrder withdrawOrder) {
+        WithdrawTransaction ta = new WithdrawTransaction();
         ta.setAddress(withdrawOrder.getAddress());
         ta.setAmount(withdrawOrder.getAmount());
         ta.setCoin(withdrawOrder.getCoin());
@@ -60,17 +51,17 @@ public class TestDepositManager {
         return ta.getId();
     }
 
-    public List<BinanceWithdrawTransaction> getWithdrawHistory(BinanceHistoryFilter historyFilter) {
+    public List<WithdrawTransaction> getWithdrawHistory(HistoryFilter historyFilter) {
         log.warn("getWithdrawHistory not supported in simulator.");
         return Collections.emptyList();
     }
 
-    public List<BinanceDepositTransaction> getDepositHistory(BinanceHistoryFilter historyFilter) {
+    public List<DepositTransaction> getDepositHistory(HistoryFilter historyFilter) {
         log.warn("getWithdrawHistory not supported in simulator.");
         return Collections.emptyList();
     }
 
-    public List<BinanceFiatOrder> getFiatOrders(BinanceFiatOrderRequest request) {
+    public List<FiatOrder> getFiatOrders(FiatOrderRequest request) {
         return this.fiatOrders;
     }
 

@@ -22,17 +22,17 @@ import static org.junit.Assert.assertNotNull;
 
 @Slf4j
 public class TradingTest {
-    private BinanceApi binanceApi = null;
+    private Api binanceApi = null;
     private String symbol = null;
-    private BinanceOrder order = null;
+    private Order order = null;
     private String asset = "";
 
     private boolean canTrade = false;
-    private BinanceAsset walletAsset = null;
+    private Asset walletAsset = null;
 
     @Before
-    public void setUp() throws BinanceApiException {
-        binanceApi = new BinanceApiDefault();
+    public void setUp() throws ApiException {
+        binanceApi = new DefaultApi();
         asset = "BNB";
         symbol = asset + "BTC";
         order = null;
@@ -46,9 +46,9 @@ public class TradingTest {
     public void tearDown() throws Exception {
         if (order != null) {
             try {
-                BinanceOrder order = binanceApi.deleteOrder(this.order);
+                Order order = binanceApi.deleteOrder(this.order);
                 log.info("Deleted order = {}", order.toString());
-            } catch (BinanceApiException e) {
+            } catch (ApiException e) {
                 log.info("Order clean up (non-critical) exception = {}", e.toString());
             }
             order = null;
@@ -56,38 +56,38 @@ public class TradingTest {
     }
 
     @Test
-    public void testGetTradeFee() throws BinanceApiException {
-        BinanceTradeFee tradeFee = binanceApi.getTradeFee("BTCUSDT", null);
+    public void testGetTradeFee() throws ApiException {
+        TradeFee tradeFee = binanceApi.getTradeFee("BTCUSDT", null);
         assertNotNull(tradeFee);
         log.info("Trade Fee = {}", tradeFee);
     }
 
     @Test
-    public void testGetIsolatedPairs() throws BinanceApiException {
-        List<BinancePair> pairs = binanceApi.getIsolatedPairs();
+    public void testGetIsolatedPairs() throws ApiException {
+        List<MarketPair> pairs = binanceApi.getIsolatedPairs();
         assertNotNull(pairs);
         log.info("Isolated trade pairs = {}", pairs);
     }
 
     @Test
-    public void testGetIsolatedPairsWithWindow1000() throws BinanceApiException {
-        List<BinancePair> pairs = binanceApi.getIsolatedPairs(1000);
+    public void testGetIsolatedPairsWithWindow1000() throws ApiException {
+        List<MarketPair> pairs = binanceApi.getIsolatedPairs(1000);
         assertNotNull(pairs);
         log.info("Isolated trade pairs = {}", pairs);
     }
 
     @Test
-    public void testGetCrossMarginPairs() throws BinanceApiException {
-        List<BinancePair> pairs = binanceApi.getCrossMargingPairs();
+    public void testGetCrossMarginPairs() throws ApiException {
+        List<MarketPair> pairs = binanceApi.getCrossMargingPairs();
         assertNotNull(pairs);
         log.info("Cross Margin trade pairs = {}", pairs);
     }
 
     @Test
-    public void testOrderWithoutPlacing() throws BinanceApiException {
+    public void testOrderWithoutPlacing() throws ApiException {
         if (canTrade) {
-            BinanceOrderPlacement placement = new BinanceOrderPlacement(symbol, BinanceOrderSide.SELL);
-            placement.setTimeInForce(BinanceTimeInForce.GTC);
+            OrderPlacement placement = new OrderPlacement(symbol, OrderSide.SELL);
+            placement.setTimeInForce(TimeInForce.GTC);
             placement.setPrice(1d);
 
             Double qty = Double.valueOf(walletAsset.getFree().longValue()); // so we could tes ton BNB
@@ -99,11 +99,11 @@ public class TradingTest {
     }
 
     @Test
-    public void testMarketOrder() throws BinanceApiException {
+    public void testMarketOrder() throws ApiException {
         if (canTrade) {
             // Testing Buying BNB with BTC - using market price
-            BinanceOrderPlacement placement = new BinanceOrderPlacement(symbol, BinanceOrderSide.BUY);
-            placement.setType(BinanceOrderType.MARKET);
+            OrderPlacement placement = new OrderPlacement(symbol, OrderSide.BUY);
+            placement.setType(OrderType.MARKET);
             Double qty = 1.0; // so we want to buy exactly 1 BNB
             if (qty.compareTo(0d) > 0) {
                 placement.setQuantity(qty); // sell some our asset for 1 BTC each
@@ -113,19 +113,19 @@ public class TradingTest {
     }
 
     @Test
-    public void testPlacingCheckingLimitOrder() throws Exception, BinanceApiException {
+    public void testPlacingCheckingLimitOrder() throws Exception, ApiException {
         if (canTrade) {
-            BinanceOrderPlacement placement = new BinanceOrderPlacement(symbol, BinanceOrderSide.SELL);
-            placement.setTimeInForce(BinanceTimeInForce.GTC);
-            placement.setType(BinanceOrderType.LIMIT);
+            OrderPlacement placement = new OrderPlacement(symbol, OrderSide.SELL);
+            placement.setTimeInForce(TimeInForce.GTC);
+            placement.setType(OrderType.LIMIT);
             placement.setPrice(1d);
 
             Double qty = Double.valueOf(walletAsset.getFree().longValue());
             if (qty.compareTo(0d) > 0) {
                 placement.setQuantity(qty); // sell some of our asset for 1 BTC each
-                BinanceOrderRef orderRef = binanceApi.createOrder(placement);
+                OrderRef orderRef = binanceApi.createOrder(placement);
                 log.info("Order Placement = {}", orderRef.toString());
-                order = binanceApi.getOrder(BinanceOrderRequest.builder()
+                order = binanceApi.getOrder(OrderRequest.builder()
                         .orderId(orderRef.getOrderId())
                         .symbol(symbol).build());
                 System.out.println(order);

@@ -8,7 +8,6 @@ package com.webcerebrium.binance.api;
  * Released under the MIT License
  * ============================================================ */
 
-import com.google.gson.JsonObject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,20 +19,20 @@ import static junit.framework.TestCase.assertEquals;
 
 public class GeneralEndpointsTest {
 
-    private BinanceApi binanceApi = null;
+    private Api binanceApi = null;
 
     @Before
-    public void setUp() throws Exception, BinanceApiException {
-        binanceApi = new BinanceApiDefault();
+    public void setUp() throws Exception, ApiException {
+        binanceApi = new DefaultApi();
     }
 
     @Test
-    public void testPingReturnsEmptyObject() throws Exception, BinanceApiException {
+    public void testPingReturnsEmptyObject() throws Exception, ApiException {
         binanceApi.ping();
     }
 
     @Test
-    public void testServerTimeIsAlmostSameAsLocal() throws Exception, BinanceApiException {
+    public void testServerTimeIsAlmostSameAsLocal() throws Exception, ApiException {
         Long time = binanceApi.getServerTime();
         assertNotNull("serverTime should be received", time);
         long localTime = (new Date()).getTime();

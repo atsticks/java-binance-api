@@ -8,20 +8,15 @@ package com.webcerebrium.binance.api;
  * Released under the MIT License
  * ============================================================ */
 
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.webcerebrium.binance.datatype.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -29,33 +24,33 @@ import static org.junit.Assert.assertTrue;
 @Slf4j
 public class MarketDataEndpointsTest {
 
-    private BinanceApi binanceApi = null;
+    private Api binanceApi = null;
     private String symbol = null;
 
     @Before
-    public void setUp() throws Exception, BinanceApiException {
-        binanceApi = new BinanceApiDefault();
+    public void setUp() throws Exception, ApiException {
+        binanceApi = new DefaultApi();
         symbol = "ETHBTC";
     }
 
     @Test
-    public void testDepthEndpoint() throws Exception, BinanceApiException {
-        BinanceDepth d = binanceApi.getDepth(symbol);
+    public void testDepthEndpoint() throws Exception, ApiException {
+        Depth d = binanceApi.getDepth(symbol);
 
         assertNotNull("depth response should contain non-empty array bids", d.getBids());
         assertNotNull("depth response should contain non-empty array asks", d.getAsks());
     }
 
     @Test
-    public void testAggTradesEndpoint() throws Exception, BinanceApiException {
-        List<BinanceAggregatedTrades> binanceAggregatedTrades = binanceApi.getAggregatedTrades(
-                BinanceAggregatedTradesRequest.builder()
+    public void testAggTradesEndpoint() throws Exception, ApiException {
+        List<AggregatedTrades> binanceAggregatedTrades = binanceApi.getAggregatedTrades(
+                AggregatedTradesRequest.builder()
                         .symbol(symbol)
                         .limit(5).build());
 
         assertTrue("Aggregated trades array should be received", binanceAggregatedTrades.size() > 0);
         // check human-looking getters for the first picked trade
-        BinanceAggregatedTrades trade = binanceAggregatedTrades.get(0);
+        AggregatedTrades trade = binanceAggregatedTrades.get(0);
 
         assertTrue("First Trade should contain tradeId", trade.getTradeId() > 0);
         assertTrue("First Trade should contain price", trade.getPrice().compareTo(0d) > 0);
@@ -66,7 +61,7 @@ public class MarketDataEndpointsTest {
     }
 
     @Test
-    public void testAggTradesEndpointWithOptions() throws Exception, BinanceApiException {
+    public void testAggTradesEndpointWithOptions() throws Exception, ApiException {
         // picking interval of last 15 minutes
         Long timeEnd = new Date().getTime();
         GregorianCalendar cal = new GregorianCalendar();
@@ -74,7 +69,7 @@ public class MarketDataEndpointsTest {
         cal.add(Calendar.MINUTE, -15);
         Long timeStart = cal.getTime().getTime();
 
-        List<BinanceAggregatedTrades> binanceAggregatedTrades = binanceApi.getAggregatedTrades(BinanceAggregatedTradesRequest.builder()
+        List<AggregatedTrades> binanceAggregatedTrades = binanceApi.getAggregatedTrades(AggregatedTradesRequest.builder()
                 .symbol(symbol)
                 .limit(5)
                 .startTime(timeStart)
@@ -82,7 +77,7 @@ public class MarketDataEndpointsTest {
 
         assertTrue("Aggregated trades array should be received", binanceAggregatedTrades.size() > 0);
         // check human-looking getters for the first picked trade
-        BinanceAggregatedTrades trade = binanceAggregatedTrades.get(0);
+        AggregatedTrades trade = binanceAggregatedTrades.get(0);
 
         assertTrue("First Trade should contain tradeId", trade.getTradeId() > 0);
         assertTrue("First Trade should contain price", trade.getPrice().compareTo(0d) > 0);
@@ -94,22 +89,22 @@ public class MarketDataEndpointsTest {
 
     @Test
     public void testIntervalsAreConvertedToStrings() throws Exception {
-        assertTrue("15min check", BinanceInterval.FIFTEEN_MIN.toString().equals("15m"));
-        assertTrue("1 hour check", BinanceInterval.ONE_HOUR.toString().equals("1h"));
-        assertTrue("1 month check", BinanceInterval.ONE_MONTH.toString().equals("1M"));
+        assertTrue("15min check", Interval.FIFTEEN_MIN.toString().equals("15m"));
+        assertTrue("1 hour check", Interval.ONE_HOUR.toString().equals("1h"));
+        assertTrue("1 month check", Interval.ONE_MONTH.toString().equals("1M"));
     }
 
     @Test
-    public void testKlinesEndpoint() throws Exception, BinanceApiException {
+    public void testKlinesEndpoint() throws Exception, ApiException {
         // checking intervals
-        List<BinanceCandlestick> klines = binanceApi.getCandlestickBars(
-                CandlestickBarRequest.builder()
+        List<Candlestick> klines = binanceApi.getCandlestickBars(
+                CandlesticksRequest.builder()
                         .symbol(symbol)
-                        .interval(BinanceInterval.FIFTEEN_MIN)
+                        .interval(Interval.FIFTEEN_MIN)
                         .limit(5).build());
         assertTrue("Klines should return non-empty array of candlesticks", klines.size() > 0);
 
-        BinanceCandlestick firstCandlestick = klines.get(0);
+        Candlestick firstCandlestick = klines.get(0);
         log.info(firstCandlestick.toString());
         assertNotNull("Candlestick should contain open", firstCandlestick.getOpen());
         assertNotNull("Candlestick should contain high", firstCandlestick.getHigh());
@@ -125,7 +120,7 @@ public class MarketDataEndpointsTest {
     }
 
     @Test
-    public void testKlinesEndpointWithOptions() throws Exception, BinanceApiException {
+    public void testKlinesEndpointWithOptions() throws Exception, ApiException {
         // picking interval of last 3 days
         Long timeEnd = new Date().getTime();
         GregorianCalendar cal = new GregorianCalendar();
@@ -133,16 +128,16 @@ public class MarketDataEndpointsTest {
         cal.add(Calendar.DATE, -3);
         Long timeStart = cal.getTime().getTime();
 
-        List<BinanceCandlestick> klines = binanceApi.getCandlestickBars(
-                CandlestickBarRequest.builder()
+        List<Candlestick> klines = binanceApi.getCandlestickBars(
+                CandlesticksRequest.builder()
                         .symbol(symbol)
-                        .interval(BinanceInterval.FIFTEEN_MIN)
+                        .interval(Interval.FIFTEEN_MIN)
                         .limit(50)
                         .startTime(timeStart)
                         .endTime(timeEnd).build());
         assertTrue("Klines should return non-empty array of candlesticks", klines.size() > 0);
 
-        BinanceCandlestick firstCandlestick = klines.get(0);
+        Candlestick firstCandlestick = klines.get(0);
         log.info(firstCandlestick.toString());
         assertNotNull("Candlestick should contain open", firstCandlestick.getOpen());
         assertNotNull("Candlestick should contain high", firstCandlestick.getHigh());
@@ -159,30 +154,30 @@ public class MarketDataEndpointsTest {
 
 
     @Test
-    public void testTicker24hrWithoutSymbolEndpoint() throws Exception, BinanceApiException {
-        List<BinanceTicker24> json = binanceApi.get24HrPriceStatistics();
+    public void testTicker24hrWithoutSymbolEndpoint() throws Exception, ApiException {
+        List<Ticker24> json = binanceApi.get24HrPriceStatistics();
         log.info("{}", json.toString());
     }
 
     @Test
-    public void testTicker24hrEndpoint() throws Exception, BinanceApiException {
-        BinanceTicker24 jsonObject = binanceApi.get24HrPriceStatistics(symbol);
+    public void testTicker24hrEndpoint() throws Exception, ApiException {
+        Ticker24 jsonObject = binanceApi.get24HrPriceStatistics(symbol);
         assertNotNull(jsonObject);
     }
 
     @Test
-    public void testAllPricesEndpoint() throws Exception, BinanceApiException {
+    public void testAllPricesEndpoint() throws Exception, ApiException {
         Double ethbtc = binanceApi.getPrices().get(symbol.toString());
         assertTrue("There should be price for " + symbol.toString(), ethbtc.compareTo(0d) > 0);
     }
 
     @Test
-    public void testAllBookTickersEndpoint() throws Exception, BinanceApiException {
-        List<BinanceTicker> mapTickers = binanceApi.getBookTickers();
+    public void testAllBookTickersEndpoint() throws Exception, ApiException {
+        List<Ticker> mapTickers = binanceApi.getBookTickers();
         assertTrue("There should be some tickers", mapTickers.size() > 0);
 
         String s = symbol.toString();
-        BinanceTicker binanceTicker = mapTickers.get(0);
+        Ticker binanceTicker = mapTickers.get(0);
         assertNotNull(s + " ticker should have bidQty", binanceTicker.getBidPrice());
         assertNotNull(s + " ticker should have askQty", binanceTicker.getAskPrice());
         assertNotNull(s + " ticker should have bidPrice", binanceTicker.getBidPrice());

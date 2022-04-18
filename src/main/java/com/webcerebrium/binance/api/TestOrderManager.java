@@ -39,8 +39,8 @@ import java.util.stream.Stream;
 @Slf4j
 public class TestOrderManager {
 
-    private List<BinanceOrder> orders = new ArrayList<>();
-    private List<BinanceTrade> trades = new ArrayList<>();
+    private List<Order> orders = new ArrayList<>();
+    private List<Trade> trades = new ArrayList<>();
 
     private AtomicLong nextOrderId = new AtomicLong(System.currentTimeMillis());
     private TestAccountManager testAccountManager;
@@ -49,14 +49,11 @@ public class TestOrderManager {
         this.testAccountManager = Objects.requireNonNull(testAccountManager);
     }
 
-    public void init() {
-    }
-
-    public BinanceOrder getOrder(BinanceOrderRef orderRef) {
+    public Order getOrder(OrderRef orderRef) {
         return orders.stream().filter(o -> orderRef.getOrderId()==o.getOrderId()).findFirst().orElse(null);
     }
 
-    public BinanceOrder getOrder(BinanceOrderRequest request) throws BinanceApiException {
+    public Order getOrder(OrderRequest request) throws ApiException {
         if(request.getOrderId()!=null) {
             return getOrderById(request.getOrderId());
         }
@@ -69,32 +66,32 @@ public class TestOrderManager {
         return null;
     }
 
-    private BinanceOrder getOrderById(Long orderId) {
+    private Order getOrderById(Long orderId) {
         return orders.stream().filter(o -> orderId == o.getOrderId()).findFirst().orElse(null);
     }
 
-    private BinanceOrder getOrderByClientOrdertId(String clientOrderId) {
+    private Order getOrderByClientOrdertId(String clientOrderId) {
         return orders.stream().filter(o -> clientOrderId.equals(o.getClientOrderId())).findFirst().orElse(null);
     }
 
-    public BinanceOrderRef createOrder(BinanceOrderPlacement orderPlacement) throws BinanceApiException {
-        BinanceOrder order = createOrderInternal(orderPlacement, false);
+    public OrderRef createOrder(OrderPlacement orderPlacement) throws ApiException {
+        Order order = createOrderInternal(orderPlacement, false);
         this.orders.add(order);
-        BinanceOrderRef ref = new BinanceOrderRef(order);
+        OrderRef ref = new OrderRef(order);
         ref.setPlacement(orderPlacement);
         return ref;
     }
 
-    public BinanceOrderRef createTestOrder(BinanceOrderPlacement orderPlacement) throws BinanceApiException {
-        BinanceOrder order = createOrderInternal(orderPlacement, true);
+    public OrderRef createTestOrder(OrderPlacement orderPlacement) throws ApiException {
+        Order order = createOrderInternal(orderPlacement, true);
         this.orders.add(order);
-        BinanceOrderRef ref = new BinanceOrderRef(order);
+        OrderRef ref = new OrderRef(order);
         ref.setPlacement(orderPlacement);
         return ref;
     }
 
-    private BinanceOrder createOrderInternal(BinanceOrderPlacement orderPlacement, boolean test) {
-        BinanceOrder order = new BinanceOrder();
+    private Order createOrderInternal(OrderPlacement orderPlacement, boolean test) {
+        Order order = new Order();
         order.setOrderId(nextOrderId.incrementAndGet());
         order.setClientOrderId(orderPlacement.getNewClientOrderId());
         order.setPrice(orderPlacement.getPrice());
@@ -104,13 +101,13 @@ public class TestOrderManager {
         order.setTimeInForce(orderPlacement.getTimeInForce());
         order.setType(orderPlacement.getType());
         order.setSymbol(orderPlacement.getSymbol());
-        order.setStatus(BinanceOrderStatus.NEW);
+        order.setStatus(OrderStatus.NEW);
         if(test){
             order.setTest(true);
         }else {
             switch(order.getType()){
                 case MARKET:
-                    BinanceTrade trade = testAccountManager.adaptBalance(order);
+                    Trade trade = testAccountManager.adaptBalance(order);
                     if(trade!=null) {
                         this.trades.add(trade);
                     }
@@ -124,49 +121,49 @@ public class TestOrderManager {
                 case STOP_LOSS_LIMIT:
                 case TAKE_PROFIT_LIMIT:
                 default:
-                    order.setStatus(BinanceOrderStatus.REJECTED);
+                    order.setStatus(OrderStatus.REJECTED);
                     break;
             }
         }
         return order;
     }
 
-    public BinanceOrder deleteOrderById(String symbol, Long orderId) throws BinanceApiException {
-        BinanceOrder order = getOrderById(orderId);
+    public Order deleteOrderById(String symbol, Long orderId) throws ApiException {
+        Order order = getOrderById(orderId);
         if(order!=null){
             if(!order.getSymbol().equals(symbol)){
                 throw new IllegalArgumentException("Invalid symbol");
             }
-            if(order.getStatus()==BinanceOrderStatus.NEW)
-                order.setStatus(BinanceOrderStatus.CANCELED);
+            if(order.getStatus()== OrderStatus.NEW)
+                order.setStatus(OrderStatus.CANCELED);
             else
-                throw new BinanceApiException("Order is not pending: "+orderId);
+                throw new ApiException("Order is not pending: "+orderId);
             return order;
         }
         return null;
     }
 
-    public BinanceOrder deleteOrderByClientOrderId(String symbol, String clientOrderId) throws BinanceApiException {
-        BinanceOrder order = getOrderByClientOrdertId(clientOrderId);
+    public Order deleteOrderByClientOrderId(String symbol, String clientOrderId) throws ApiException {
+        Order order = getOrderByClientOrdertId(clientOrderId);
         if(order!=null){
             if(!order.getSymbol().equals(symbol)){
                 throw new IllegalArgumentException("Invalid symbol");
             }
-            if(order.getStatus()==BinanceOrderStatus.NEW)
-                order.setStatus(BinanceOrderStatus.CANCELED);
+            if(order.getStatus()== OrderStatus.NEW)
+                order.setStatus(OrderStatus.CANCELED);
             else
-                throw new BinanceApiException("Order is not pending (client order): "+clientOrderId);
+                throw new ApiException("Order is not pending (client order): "+clientOrderId);
             return order;
         }
         return  null;
     }
 
-    public List<BinanceOrder> getOpenOrders() throws BinanceApiException {
-        return orders.stream().filter(o -> o.getStatus()==BinanceOrderStatus.NEW).collect(Collectors.toList());
+    public List<Order> getOpenOrders() throws ApiException {
+        return orders.stream().filter(o -> o.getStatus()== OrderStatus.NEW).collect(Collectors.toList());
     }
 
-    public List<BinanceOrder> getOpenOrders(BinanceOpenOrderRequest request) throws BinanceApiException {
-        Stream<BinanceOrder> stream = orders.stream().filter(r -> r.getStatus()==BinanceOrderStatus.NEW);
+    public List<Order> getOpenOrders(OpenOrderRequest request) throws ApiException {
+        Stream<Order> stream = orders.stream().filter(r -> r.getStatus()== OrderStatus.NEW);
         if(request.getSymbol()!=null){
             stream.filter(r -> r.getSymbol().equals(request.getSymbol()));
         }
@@ -179,12 +176,12 @@ public class TestOrderManager {
         return stream.collect(Collectors.toList());
     }
 
-    public List<BinanceOrder> cancelOpenOrder(BinanceDeleteOrderRequest request) throws BinanceApiException {
+    public List<Order> cancelOpenOrder(DeleteOrderRequest request) throws ApiException {
         return Collections.emptyList();
     }
 
-    public List<BinanceOrder> getOrders(BinanceAllOrderRequest request) throws BinanceApiException {
-        Stream<BinanceOrder> stream = orders.stream().filter(r -> r.getStatus()==BinanceOrderStatus.NEW);
+    public List<Order> getOrders(AllOrderRequest request) throws ApiException {
+        Stream<Order> stream = orders.stream().filter(r -> r.getStatus()== OrderStatus.NEW);
         if(request.getSymbol()!=null){
             stream.filter(r -> r.getSymbol().equals(request.getSymbol()));
         }
@@ -200,12 +197,12 @@ public class TestOrderManager {
         return stream.collect(Collectors.toList());
     }
 
-    public List<BinanceOrder> geClosedOrders(BinanceClosedOrderRequest request) throws BinanceApiException {
-        return orders.stream().filter(p -> p.getStatus()!=BinanceOrderStatus.NEW).collect(Collectors.toList());
+    public List<Order> geClosedOrders(ClosedOrderRequest request) throws ApiException {
+        return orders.stream().filter(p -> p.getStatus()!= OrderStatus.NEW).collect(Collectors.toList());
     }
 
-    public List<BinanceOrder> getOrders(String symbol, Long orderId, int limit) throws BinanceApiException {
-        Stream<BinanceOrder> stream = orders.stream().filter(r -> r.getStatus()==BinanceOrderStatus.NEW);
+    public List<Order> getOrders(String symbol, Long orderId, int limit) throws ApiException {
+        Stream<Order> stream = orders.stream().filter(r -> r.getStatus()== OrderStatus.NEW);
         if(symbol!=null){
             stream.filter(r -> r.getSymbol().equals(symbol));
         }
@@ -217,8 +214,8 @@ public class TestOrderManager {
         return stream.collect(Collectors.toList());
     }
 
-    public List<BinanceTrade> getMyTrades(BinanceTradesRequest request) throws BinanceApiException {
-        Stream<BinanceTrade> tradeStream = trades.stream();
+    public List<Trade> getMyTrades(TradesRequest request) throws ApiException {
+        Stream<Trade> tradeStream = trades.stream();
         if(request.getOrderId()!=null){
             tradeStream.filter(t -> t.getId().equals(request.getOrderId()));
         }
@@ -237,18 +234,18 @@ public class TestOrderManager {
         return tradeStream.collect(Collectors.toList());
     }
 
-    public List<BinanceTrade> getTrades(String symbol, int limit) throws BinanceApiException {
-        Stream<BinanceTrade> tradeStream = trades.stream();
+    public List<Trade> getTrades(String symbol, int limit) throws ApiException {
+        Stream<Trade> tradeStream = trades.stream();
         tradeStream.filter(t -> symbol.contains(t.getCommissionAsset()));
         return tradeStream.limit(limit).collect(Collectors.toList());
     }
 
-    public List<BinanceAggregatedTrades> getAggregatedTrades(BinanceAggregatedTradesRequest request) {
+    public List<AggregatedTrades> getAggregatedTrades(AggregatedTradesRequest request) {
         log.warn("getAggregatedTrades not supported by test OrderManager");
         return Collections.emptyList();
     }
 
-    public List<BinanceHistoricalTrade> getHistoricalTrades(BinanceHistoricalTradesRequest request) {
+    public List<HistoricalTrade> getHistoricalTrades(HistoricalTradesRequest request) {
         log.warn("getAggregatedTrades not supported by test OrderManager");
         return Collections.emptyList();
     }

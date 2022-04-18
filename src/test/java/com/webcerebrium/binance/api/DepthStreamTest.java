@@ -8,11 +8,10 @@ package com.webcerebrium.binance.api;
  * Released under the MIT License
  * ============================================================ */
 
-import com.webcerebrium.binance.datatype.BinanceEventDepthLevelUpdate;
-import com.webcerebrium.binance.datatype.BinanceEventDepthUpdate;
-import com.webcerebrium.binance.datatype.BinanceSymbol;
-import com.webcerebrium.binance.websocket.BinanceWebSocketAdapterDepth;
-import com.webcerebrium.binance.websocket.BinanceWebSocketAdapterDepthLevel;
+import com.webcerebrium.binance.datatype.events.DepthLevelUpdateEvent;
+import com.webcerebrium.binance.datatype.events.DepthUpdateEvent;
+import com.webcerebrium.binance.websocket.WebSocketDepthAdapter;
+import com.webcerebrium.binance.websocket.WebSocketDepthLevelAdapter;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.websocket.api.Session;
 import org.junit.Before;
@@ -21,20 +20,20 @@ import org.junit.Test;
 @Slf4j
 public class DepthStreamTest {
 
-    private BinanceApi binanceApi = null;
+    private Api binanceApi = null;
     private String symbol = null;
 
     @Before
-    public void setUp() throws Exception, BinanceApiException {
-        binanceApi = new BinanceApiDefault();
+    public void setUp() throws Exception, ApiException {
+        binanceApi = new DefaultApi();
         symbol = "ETHBTC";
     }
 
     @Test
-    public void testDepthStreamWatcher() throws Exception, BinanceApiException {
-        Session session = binanceApi.websocketDepth(symbol, new BinanceWebSocketAdapterDepth() {
+    public void testDepthStreamWatcher() throws Exception, ApiException {
+        Session session = binanceApi.websocketDepth(symbol, new WebSocketDepthAdapter() {
             @Override
-            public void onMessage(BinanceEventDepthUpdate message) {
+            public void onMessage(DepthUpdateEvent message) {
                 log.info(message.toString());
             }
         });
@@ -43,10 +42,10 @@ public class DepthStreamTest {
     }
 
     @Test
-    public void testDepth5StreamWatcher() throws Exception, BinanceApiException {
-        Session session = binanceApi.websocketDepth5(symbol, new BinanceWebSocketAdapterDepthLevel() {
+    public void testDepth5StreamWatcher() throws Exception, ApiException {
+        Session session = binanceApi.websocketDepth5(symbol, new WebSocketDepthLevelAdapter() {
             @Override
-            public void onMessage(BinanceEventDepthLevelUpdate message) {
+            public void onMessage(DepthLevelUpdateEvent message) {
                 log.info(message.toString());
             }
         });

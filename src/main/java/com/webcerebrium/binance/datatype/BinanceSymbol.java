@@ -26,10 +26,7 @@
 package com.webcerebrium.binance.datatype;
 
 import com.google.common.base.Strings;
-import com.webcerebrium.binance.api.BinanceApiException;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import com.webcerebrium.binance.api.ApiException;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -40,13 +37,13 @@ public final class BinanceSymbol {
 
     private BinanceSymbol(){}
 
-    public static String normalize(String symbol)  throws BinanceApiException {
+    public static String normalize(String symbol)  throws ApiException {
         // sanitizing symbol, preventing from common user-input errors
         if (Strings.isNullOrEmpty(symbol)) {
-            throw new BinanceApiException("Symbol cannot be empty. Example: BQXBTC");
+            throw new ApiException("Symbol cannot be empty. Example: BQXBTC");
         }
         if (symbol.contains(" ")) {
-            throw new BinanceApiException("Symbol cannot contain spaces. Example: BQXBTC");
+            throw new ApiException("Symbol cannot contain spaces. Example: BQXBTC");
         }
 //        if (!symbol.endsWith("BTC") && !symbol.endsWith("ETH")&& !symbol.endsWith("BNB") && !symbol.endsWith("USDT")) {
 //            throw new BinanceApiException("Market Symbol should be ending with BTC, ETH, BNB or USDT. Example: BQXBTC. Provided: " + symbol);
