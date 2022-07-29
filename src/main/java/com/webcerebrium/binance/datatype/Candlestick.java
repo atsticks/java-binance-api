@@ -122,7 +122,7 @@ public class Candlestick implements Comparable<Candlestick>, HasSymbol, HasValue
         if(openTime!=null && closeTime!=null) {
             return closeTime - openTime;
         }
-        return 0;
+        return Interval.EIGHT_HOURS.toMillis();
     }
 
     public Double getDistance(){

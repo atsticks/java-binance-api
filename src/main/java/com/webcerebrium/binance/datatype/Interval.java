@@ -31,31 +31,38 @@ package com.webcerebrium.binance.datatype;
 // 1d,3d,1w,1M
 
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public enum Interval {
 
-    ONE_MIN("1m"),
-    THREE_MIN("3m"),
-    FIVE_MIN("5m"),
-    FIFTEEN_MIN("15m"),
-    THIRTY_MIN("30m"),
+    ONE_MIN("1m", TimeUnit.MINUTES.toMillis(1)),
+    THREE_MIN("3m", TimeUnit.MINUTES.toMillis(3)),
+    FIVE_MIN("5m", TimeUnit.MINUTES.toMillis(5)),
+    FIFTEEN_MIN("15m", TimeUnit.MINUTES.toMillis(15)),
+    THIRTY_MIN("30m", TimeUnit.MINUTES.toMillis(30)),
 
-    ONE_HOUR("1h"),
-    TWO_HOURS("2h"),
-    FOUR_HOURS("4h"),
-    SIX_HOURS("6h"),
-    EIGHT_HOURS("8h"),
-    TWELVE_HOURS("12h"),
+    ONE_HOUR("1h", TimeUnit.HOURS.toMillis(1)),
+    TWO_HOURS("2h", TimeUnit.HOURS.toMillis(2)),
+    FOUR_HOURS("4h", TimeUnit.HOURS.toMillis(4)),
+    SIX_HOURS("6h", TimeUnit.HOURS.toMillis(6)),
+    EIGHT_HOURS("8h", TimeUnit.HOURS.toMillis(8)),
+    TWELVE_HOURS("12h", TimeUnit.HOURS.toMillis(12)),
 
-    ONE_DAY("1d"),
-    THREE_DAYS("3d"),
-    ONE_WEEK("1w"),
-    ONE_MONTH("1M")
+    ONE_DAY("1d", TimeUnit.DAYS.toMillis(1)),
+    THREE_DAYS("3d", TimeUnit.DAYS.toMillis(3)),
+    ONE_WEEK("1w", TimeUnit.DAYS.toMillis(7)),
+    ONE_MONTH("1M", TimeUnit.DAYS.toMillis(30))
     ;
     private String value;
+    private  long millis;
 
-    Interval(final String value) {
+    Interval(final String value, long millis) {
         this.value = value;
+        this.millis = millis;
+    }
+
+    public long toMillis() {
+        return millis;
     }
 
     public String getValue() {
