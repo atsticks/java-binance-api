@@ -67,8 +67,8 @@ public final class RateLimiter {
         return accessCount.get();
     }
 
-    private void resetLimiter() {
-        log.info("Resetting rate limiter from {} tokens counted in {} ms...", accessCount.get(), ratePeriod);
+    private void resetLimiter(){
+        log.trace("Resetting rate limiter from {} tokens counted in {} ms...", accessCount.get(), ratePeriod);
         accessCount.set(0);
     }
 

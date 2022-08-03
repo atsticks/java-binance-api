@@ -39,6 +39,8 @@ public final class Asset implements HasValue{
     private String name;
     private Double free;
     private Double locked;
+    private double presentationRate;
+    private String presentationCurrency;
     private long timestamp = System.currentTimeMillis();
 
     public void read(JsonObject ob){
@@ -62,6 +64,19 @@ public final class Asset implements HasValue{
     @Override
     public double getValue() {
         return free!=null?free:0.0;
+    }
+
+    public void setPresentationRate(double presentationRate, String currency){
+        this.presentationCurrency = Objects.requireNonNull(currency);
+        this.presentationRate = presentationRate;
+    }
+
+    public double getFreeAsPresentation() {
+        return free!=null && presentationRate >0?free * presentationRate:0.0;
+    }
+
+    public double getLockedAsPresentation() {
+        return locked!=null && presentationRate >0?locked * presentationRate:0.0;
     }
 
 }
