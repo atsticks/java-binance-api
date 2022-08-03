@@ -40,7 +40,9 @@ public final class Asset implements HasValue{
     private Double free;
     private Double locked;
     private double presentationRate;
+    @Setter(AccessLevel.NONE)
     private String presentationCurrency;
+    @Setter(AccessLevel.NONE)
     private long timestamp = System.currentTimeMillis();
 
     public void read(JsonObject ob){

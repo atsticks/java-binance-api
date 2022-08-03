@@ -104,4 +104,24 @@ public class Account {
                 .collect(Collectors.toSet());
     }
 
+    public double getPresentationValue() {
+        return getFreePresentationValue() + getLockedPresentationValue();
+    }
+
+    public double getFreePresentationValue() {
+        double sum = 0;
+        for(Asset asset:assets.values()){
+            sum += asset.getFreeAsPresentation();
+        }
+        return sum;
+    }
+
+    public double getLockedPresentationValue() {
+        double sum = 0;
+        for(Asset asset:assets.values()){
+            sum += asset.getLockedAsPresentation();
+        }
+        return sum;
+    }
+
 }
