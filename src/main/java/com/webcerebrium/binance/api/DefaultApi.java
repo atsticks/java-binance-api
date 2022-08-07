@@ -96,6 +96,8 @@ public class DefaultApi implements Api {
 
     private Semaphore maxConnections = new Semaphore(10);
 
+    private long serverTimeOffset;
+
     /**
      * Constructor of API when you exactly know the keys
      * @param apiKey Public API Key
@@ -117,9 +119,7 @@ public class DefaultApi implements Api {
         this.secretKey = config.getVariable("BINANCE_SECRET_KEY");
     }
 
-    public void initialize(){
-        // nothing todo here...
-    }
+
 
     /**
      * Validation we have API keys set up
@@ -137,6 +137,16 @@ public class DefaultApi implements Api {
     // GENERAL ENDPOINTS
     // - - - - - - - - - - - - - - - - - - - - - - - -
 
+    @Override
+    public void initialize() {
+        try{
+            Long serverTime = getServerTime();
+            serverTimeOffset = serverTime -System.currentTimeMillis();
+        }catch(Exception e){
+            log.warn("Initialization failed: cannot access server time.", e);
+        }
+    }
+
     /**
      * Checking connectivity,
      * @return empty object
@@ -146,7 +156,7 @@ public class DefaultApi implements Api {
         try {
             maxConnections.acquire();
             limiter.acquire();
-            new WebRequest(baseUrl + "v1/ping")
+            new WebRequest(serverTimeOffset, baseUrl + "v1/ping")
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .read().asJsonObject();
             return true;
@@ -168,7 +178,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire();
-            return (new WebRequest(baseUrl + "v1/time"))
+            return (new WebRequest(serverTimeOffset, baseUrl + "v1/time"))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .read().asJsonObject().get("serverTime").getAsLong();
         }catch(InterruptedException e){
@@ -193,7 +203,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire();
-            JsonObject ob = new WebRequest(baseUrl + "v1/node-info")
+            JsonObject ob = new WebRequest(serverTimeOffset, baseUrl + "v1/node-info")
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .read().asJsonObject();
             JsonObject node_info = ob.get("node_info").getAsJsonObject();
@@ -222,7 +232,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire();
-            JsonArray arr = new WebRequest(baseUrl + "v1/peers")
+            JsonArray arr = new WebRequest(serverTimeOffset, baseUrl + "v1/peers")
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .read().asJsonArray();
             List<Peer> peers = new ArrayList<>();
@@ -254,7 +264,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire();
-            JsonObject ob = new WebRequest(baseUrl + "v1/depth?symbol=" + Objects.requireNonNull(symbol))
+            JsonObject ob = new WebRequest(serverTimeOffset, baseUrl + "v1/depth?symbol=" + Objects.requireNonNull(symbol))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .read().asJsonObject();
             JsonArray asks = ob.get("asks").getAsJsonArray();
@@ -286,7 +296,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(weight);
-            JsonObject ob = new WebRequest(baseUrl + "v1/depth?symbol=" + Objects.requireNonNull(symbol) + "&limit=" + limit)
+            JsonObject ob = new WebRequest(serverTimeOffset, baseUrl + "v1/depth?symbol=" + Objects.requireNonNull(symbol) + "&limit=" + limit)
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .read().asJsonObject();
             JsonArray asks = ob.get("asks").getAsJsonArray();
@@ -314,7 +324,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(1);
             String url = baseVapiUrl + "v1/optionInfo";
-            JsonObject obj = new WebRequest(url).sign(apiKey, secretKey, null)
+            JsonObject obj = new WebRequest(serverTimeOffset, url).sign(apiKey, secretKey, null)
                     .read().asJsonObject();
             List<MarketPair> pairs = new ArrayList<>();
 //            arr.forEach(p -> {
@@ -340,7 +350,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(1);
             String url = baseVapiUrl + "v1/ticker";
-            JsonObject obj = new WebRequest(url).sign(apiKey, secretKey, null)
+            JsonObject obj = new WebRequest(serverTimeOffset, url).sign(apiKey, secretKey, null)
                     .read().asJsonObject();
             List<MarketPair> pairs = new ArrayList<>();
 //            arr.forEach(p -> {
@@ -370,7 +380,7 @@ public class DefaultApi implements Api {
             if(symbol!=null){
                 url += "&symbol="+symbol;
             }
-            JsonObject obj = new WebRequest(url).sign(apiKey, secretKey, null)
+            JsonObject obj = new WebRequest(serverTimeOffset, url).sign(apiKey, secretKey, null)
                     .read().asJsonObject();
             List<MarketPair> pairs = new ArrayList<>();
 //            arr.forEach(p -> {
@@ -400,7 +410,7 @@ public class DefaultApi implements Api {
             if(recvWindow!=null){
                 url += "?recvWindow="+recvWindow;
             }
-            JsonArray arr = new WebRequest(url).sign(apiKey, secretKey, null)
+            JsonArray arr = new WebRequest(serverTimeOffset, url).sign(apiKey, secretKey, null)
                     .read().asJsonArray();
             List<MarketPair> pairs = new ArrayList<>();
             arr.forEach(p -> {
@@ -425,7 +435,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
-            JsonArray arr = new WebRequest( baseSapiUrl + "v1/margin/allPairs" )
+            JsonArray arr = new WebRequest(serverTimeOffset,  baseSapiUrl + "v1/margin/allPairs" )
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey, secretKey, null)
                     .read().asJsonArray();
@@ -454,7 +464,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(5);
             String u = baseUrl + "v3/historicalTrades" + request.toQueryString();
-            String lastResponse = new WebRequest(u)
+            String lastResponse = new WebRequest(serverTimeOffset, u)
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).read().getLastResponse();
             Type listType = new TypeToken<List<HistoricalTrade>>() {
             }.getType();
@@ -483,7 +493,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(1);
             String u = baseUrl + "v3/aggTrades" + request.toQueryString();
-            String lastResponse = new WebRequest(u)
+            String lastResponse = new WebRequest(serverTimeOffset, u)
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).read().getLastResponse();
             Type listType = new TypeToken<List<AggregatedTrades>>() {
             }.getType();
@@ -508,7 +518,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire();
             String u = baseUrl + "v3/klines" +request.toQueryString();
-            JsonArray jsonElements = new WebRequest(u).connectionTimeoutSeconds(connectionTimeoutSeconds).read().asJsonArray();
+            JsonArray jsonElements = new WebRequest(serverTimeOffset, u).connectionTimeoutSeconds(connectionTimeoutSeconds).read().asJsonArray();
             List<Candlestick> list = new LinkedList<>();
             for (JsonElement e : jsonElements) list.add(new Candlestick(request.getSymbol(), request.getInterval())
                     .read(e.getAsJsonArray(), request.getInterval()));
@@ -530,7 +540,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(10);
-            JsonObject jsonObject = (new WebRequest(baseUrl + "v3/exchangeInfo"))
+            JsonObject jsonObject = (new WebRequest(serverTimeOffset, baseUrl + "v3/exchangeInfo"))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .read().asJsonObject();
             return new ExchangeInfo(jsonObject);
@@ -552,7 +562,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(40);
             List<Ticker24> result = new ArrayList<>();
-            JsonArray data = new WebRequest(baseUrl + "v1/ticker/24hr" )
+            JsonArray data = new WebRequest(serverTimeOffset, baseUrl + "v1/ticker/24hr" )
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .read().asJsonArray();
             data.forEach(d -> {
@@ -582,7 +592,7 @@ public class DefaultApi implements Api {
             limiter.acquire(1);
             Ticker24 ticker = new Ticker24();
             ticker.setSymbol(Objects.requireNonNull(symbol));
-            ticker.read (new WebRequest(baseUrl + "v1/ticker/24hr?symbol=" + symbol)
+            ticker.read (new WebRequest(serverTimeOffset, baseUrl + "v1/ticker/24hr?symbol=" + symbol)
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .read().asJsonObject());
             return ticker;
@@ -606,7 +616,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
-            JsonObject ob = new WebRequest(baseUrl + "v3/ticker/price?symbol="+Objects.requireNonNull(symbol))
+            JsonObject ob = new WebRequest(serverTimeOffset, baseUrl + "v3/ticker/price?symbol="+Objects.requireNonNull(symbol))
                     .read().asJsonObject();
             return ob.get("price").getAsDouble();
         }catch(InterruptedException e){
@@ -628,7 +638,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(2);
             Map<String, Double> map = new ConcurrentHashMap<>();
-            JsonArray array = (new WebRequest(baseUrl + "v3/ticker/price"))
+            JsonArray array = (new WebRequest(serverTimeOffset, baseUrl + "v3/ticker/price"))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .read().asJsonArray();
             for (JsonElement elem : array) {
@@ -653,7 +663,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
-            JsonObject ob = new WebRequest(baseUrl + "v3/avgPrice?symbol="+Objects.requireNonNull(symbol))
+            JsonObject ob = new WebRequest(serverTimeOffset, baseUrl + "v3/avgPrice?symbol="+Objects.requireNonNull(symbol))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .read().asJsonObject();
             AveragePrice price = new AveragePrice(symbol);
@@ -677,7 +687,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(2);
-            String lastResponse = (new WebRequest(baseUrl + "v3/ticker/bookTicker"))
+            String lastResponse = (new WebRequest(serverTimeOffset, baseUrl + "v3/ticker/bookTicker"))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).read().getLastResponse();
             Type listType = new TypeToken<List<Ticker>>() {
             }.getType();
@@ -701,7 +711,7 @@ public class DefaultApi implements Api {
         try {
             maxConnections.acquire();
             limiter.acquire(1);
-            JsonObject ob = new WebRequest(baseUrl + "v3/ticker/bookTicker?symbol=" + Objects.requireNonNull(symbol))
+            JsonObject ob = new WebRequest(serverTimeOffset, baseUrl + "v3/ticker/bookTicker?symbol=" + Objects.requireNonNull(symbol))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).read().asJsonObject();
             Ticker ticker = new Ticker(symbol);
             ticker.read(ob);
@@ -728,7 +738,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(10);
             Account account = new Account();
-            account.read (new WebRequest(baseUrl + "v3/account")
+            account.read (new WebRequest(serverTimeOffset, baseUrl + "v3/account")
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey, secretKey, null).read().asJsonObject());
             return account;
@@ -772,7 +782,7 @@ public class DefaultApi implements Api {
             if (recvWindow != null) {
                 url += "&recvWindow=" + recvWindow;
             }
-            JsonArray arr = new WebRequest(url)
+            JsonArray arr = new WebRequest(serverTimeOffset, url)
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey, secretKey, null).read().asJsonArray();
             for (JsonElement tr : arr) {
@@ -918,7 +928,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
 	        limiter.acquire(3);
             String u = baseUrl + "v3/openOrders";
-            String lastResponse = (new WebRequest(u))
+            String lastResponse = (new WebRequest(serverTimeOffset, u))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).read().getLastResponse();
             Type listType = new TypeToken<List<Order>>() {
             }.getType();
@@ -942,7 +952,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(3);
             String u = baseUrl + "v3/openOrders" + request.toQueryString();
-            String lastResponse = (new WebRequest(u))
+            String lastResponse = (new WebRequest(serverTimeOffset, u))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).read().getLastResponse();
             Type listType = new TypeToken<List<Order>>() {
             }.getType();
@@ -966,7 +976,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(3);
             String u = baseUrl + "v3/openOrders" + request.toQueryString();
-            String lastResponse = (new WebRequest(u))
+            String lastResponse = (new WebRequest(serverTimeOffset, u))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).delete().getLastResponse();
             Type listType = new TypeToken<List<Order>>() {
             }.getType();
@@ -991,7 +1001,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(10);
             String u = baseUrl + "v3/allOrders"+request.toQueryString();
-            String lastResponse = (new WebRequest(u))
+            String lastResponse = (new WebRequest(serverTimeOffset, u))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).read().getLastResponse();
             Type listType = new TypeToken<List<Order>>() {
             }.getType();
@@ -1016,7 +1026,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/closedOrders" + request.toQueryString();
-            String lastResponse = (new WebRequest(u))
+            String lastResponse = (new WebRequest(serverTimeOffset, u))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).read().getLastResponse();
             Type listType = new TypeToken<List<Order>>() {
             }.getType();
@@ -1045,7 +1055,7 @@ public class DefaultApi implements Api {
             String u = baseUrl + "v3/allOrders?symbol=" + Objects.requireNonNull(symbol) + "&limit=" + limit;
             if (orderId != null && orderId > 0) u += "&orderId=" + orderId;
 
-            String lastResponse = (new WebRequest(u))
+            String lastResponse = (new WebRequest(serverTimeOffset, u))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).read().getLastResponse();
             Type listType = new TypeToken<List<Order>>() {}.getType();
             return new Gson().fromJson(lastResponse, listType);
@@ -1069,7 +1079,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(10);
             String u = baseUrl + "v3/myTrades" + request.toQueryString();
-            String lastResponse = new WebRequest(u)
+            String lastResponse = new WebRequest(serverTimeOffset, u)
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).read().getLastResponse();
             Type listType = new TypeToken<List<Trade>>() {}.getType();
             return new Gson().fromJson(lastResponse, listType);
@@ -1095,7 +1105,7 @@ public class DefaultApi implements Api {
             limiter.acquire(1);
             String u = baseUrl + "v3/trades?symbol=" + Objects.requireNonNull(symbol) + "&limit=" + limit;
             // sign(apiKey, secretKey, null)
-            String lastResponse = new WebRequest(u).connectionTimeoutSeconds(connectionTimeoutSeconds).read().getLastResponse();
+            String lastResponse = new WebRequest(serverTimeOffset, u).connectionTimeoutSeconds(connectionTimeoutSeconds).read().getLastResponse();
             Type listType = new TypeToken<List<Trade>>() {}.getType();
             return new Gson().fromJson(lastResponse, listType);
         }catch(InterruptedException e){
@@ -1157,7 +1167,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/order"+request.toQueryString();
-            String lastResponse = new WebRequest(u)
+            String lastResponse = new WebRequest(serverTimeOffset, u)
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).read().getLastResponse();
             return (new Gson()).fromJson(lastResponse, Order.class);
         }catch(InterruptedException e){
@@ -1182,7 +1192,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/order?" + orderPlacement.getAsQuery();
-            String lastResponse = new WebRequest(u)
+            String lastResponse = new WebRequest(serverTimeOffset, u)
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).post().read().getLastResponse();
             OrderRef newOrder = (new Gson()).fromJson(lastResponse, OrderRef.class);
             newOrder.setPlacement(orderPlacement);
@@ -1205,7 +1215,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(1);
             String u = baseUrl + "v3/order/test?" + orderPlacement.getAsQuery();
-            String lastResponse = new WebRequest(u)
+            String lastResponse = new WebRequest(serverTimeOffset, u)
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).post().read().getLastResponse();
             OrderRef newOrder;
             if(lastResponse.equals("{}")){
@@ -1241,7 +1251,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/order?symbol=" + Objects.requireNonNull(symbol) + "&orderId=" + orderId;
-            JsonObject ob = (new WebRequest(u))
+            JsonObject ob = (new WebRequest(serverTimeOffset, u))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).delete().read().asJsonObject();
             return new Order(ob);
         }catch(InterruptedException e){
@@ -1263,7 +1273,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/order?symbol=" + Objects.requireNonNull(symbol) + "&origClientOrderId=" + esc.escape(origClientOrderId);
-            JsonObject ob = (new WebRequest(u))
+            JsonObject ob = (new WebRequest(serverTimeOffset, u))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).delete().read().asJsonObject();
             return new Order(ob);
         }catch(InterruptedException e){
@@ -1286,7 +1296,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/order?symbol=" + Objects.requireNonNull(symbol) + "&newClientOrderId=" + esc.escape(clientOrderId);
-            JsonObject ob = (new WebRequest(u))
+            JsonObject ob = (new WebRequest(serverTimeOffset, u))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).delete().read().asJsonObject();
             return new Order(ob);
         }catch(InterruptedException e){
@@ -1313,7 +1323,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
-            JsonObject jsonObject = (new WebRequest(baseUrl + "v3/userDataStream"))
+            JsonObject jsonObject = (new WebRequest(serverTimeOffset, baseUrl + "v3/userDataStream"))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey).post().read().asJsonObject();
             return jsonObject.get("listenKey").getAsString();
@@ -1334,7 +1344,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
-            new WebRequest(baseUrl + "v3/userDataStream?listenKey=" + esc.escape(listenKey))
+            new WebRequest(serverTimeOffset, baseUrl + "v3/userDataStream?listenKey=" + esc.escape(listenKey))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                         .sign(apiKey).put().read().asJsonObject();
         }catch(InterruptedException e){
@@ -1354,7 +1364,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
-            new WebRequest(baseUrl + "v3/userDataStream?listenKey=" + esc.escape(listenKey))
+            new WebRequest(serverTimeOffset, baseUrl + "v3/userDataStream?listenKey=" + esc.escape(listenKey))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey).delete().read();
         }catch(InterruptedException e){
@@ -1378,7 +1388,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
-            JsonObject jsonObject = (new WebRequest(baseSapiUrl + "v1/userDataStream/isolated"))
+            JsonObject jsonObject = (new WebRequest(serverTimeOffset, baseSapiUrl + "v1/userDataStream/isolated"))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey).post().read().asJsonObject();
             return jsonObject.get("listenKey").getAsString();
@@ -1399,7 +1409,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
-            new WebRequest(baseSapiUrl + "v1/userDataStream/isolated?listenKey=" + esc.escape(listenKey))
+            new WebRequest(serverTimeOffset, baseSapiUrl + "v1/userDataStream/isolated?listenKey=" + esc.escape(listenKey))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey).put().read().asJsonObject();
         }catch(InterruptedException e){
@@ -1419,7 +1429,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
-            new WebRequest(baseSapiUrl + "v1/userDataStream/isolated?listenKey=" + esc.escape(listenKey))
+            new WebRequest(serverTimeOffset, baseSapiUrl + "v1/userDataStream/isolated?listenKey=" + esc.escape(listenKey))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey).delete().read();
         }catch(InterruptedException e){
@@ -1441,7 +1451,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
-            JsonObject jsonObject = (new WebRequest(baseSapiUrl + "v1/userDataStream"))
+            JsonObject jsonObject = (new WebRequest(serverTimeOffset, baseSapiUrl + "v1/userDataStream"))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey).post().read().asJsonObject();
             return jsonObject.get("listenKey").getAsString();
@@ -1462,7 +1472,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
-            new WebRequest(baseSapiUrl + "v1/userDataStream?listenKey=" + esc.escape(listenKey))
+            new WebRequest(serverTimeOffset, baseSapiUrl + "v1/userDataStream?listenKey=" + esc.escape(listenKey))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey).put().read().asJsonObject();
         }catch(InterruptedException e){
@@ -1482,7 +1492,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
-            new WebRequest(baseSapiUrl + "v1/userDataStream?listenKey=" + esc.escape(listenKey))
+            new WebRequest(serverTimeOffset, baseSapiUrl + "v1/userDataStream?listenKey=" + esc.escape(listenKey))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey).delete().read();
         }catch(InterruptedException e){
@@ -1508,7 +1518,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
-            JsonObject ob = new WebRequest(baseSapiUrl + "v1/fiat/orders"+request.toQueryString())
+            JsonObject ob = new WebRequest(serverTimeOffset, baseSapiUrl + "v1/fiat/orders"+request.toQueryString())
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey, secretKey, null).read().asJsonObject();
             if(ob.has("data")){
@@ -1536,7 +1546,7 @@ public class DefaultApi implements Api {
         try{
             maxConnections.acquire();
             limiter.acquire(1);
-            JsonObject ob = new WebRequest(baseSapiUrl + "v1/fiat/payments"+request.toQueryString())
+            JsonObject ob = new WebRequest(serverTimeOffset, baseSapiUrl + "v1/fiat/payments"+request.toQueryString())
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey, secretKey, null).read().asJsonObject();
             if(ob.has("data")){
@@ -1598,7 +1608,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(1);
             String u = baseSapiUrl + "/v1/capital/withdraw/apply" + withdrawOrder.toQueryString();
-            return (new WebRequest(u))
+            return (new WebRequest(serverTimeOffset, u))
                     .connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey).post().read().asJsonObject().get("id").getAsString();
         }catch(InterruptedException e){
@@ -1624,7 +1634,7 @@ public class DefaultApi implements Api {
             limiter.acquire(1);
             String u = baseSapiUrl + "v1/capital/withdraw/history" + historyFilter.getAsQuery();
             List<WithdrawTransaction> result = new ArrayList<>();
-            JsonArray array = new WebRequest(u)
+            JsonArray array = new WebRequest(serverTimeOffset, u)
                     .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey).read().asJsonArray();
             array.forEach(el -> {
                 JsonObject ob = el.getAsJsonObject();
@@ -1667,7 +1677,7 @@ public class DefaultApi implements Api {
             limiter.acquire(1);
             String u = baseSapiUrl + "v1/capital/deposit/hisrec" + historyFilter.getAsQuery();
             List<DepositTransaction> result = new ArrayList<>();
-            JsonArray array = new WebRequest(u).connectionTimeoutSeconds(connectionTimeoutSeconds)
+            JsonArray array = new WebRequest(serverTimeOffset, u).connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .sign(apiKey).read().asJsonArray();
             array.forEach(el -> {
                 JsonObject ob = el.getAsJsonObject();
@@ -1704,7 +1714,7 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(1);
             String u = baseSapiUrl + "v1/system/status";
-            JsonObject ob = new WebRequest(u).connectionTimeoutSeconds(connectionTimeoutSeconds)
+            JsonObject ob = new WebRequest(serverTimeOffset, u).connectionTimeoutSeconds(connectionTimeoutSeconds)
                     .read().asJsonObject();
             SystemStatus status = new SystemStatus();
             status.setStatus(ob.get("status").getAsInt());

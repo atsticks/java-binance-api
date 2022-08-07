@@ -72,48 +72,66 @@ public class TestAccountManager {
         if(targetAsset == null){
             throw new ApiException("Unknown target coin: " + targetCoin + " in symbol " + symbol);
         }
+        double amount = order.getOrigQty();
+        double price = 0.0;
+        if(order.getPrice()!=null){
+            price = order.getPrice();
+        }else{
+            Double d = api.getPrice(order.getSymbol());
+            if(d!=null){
+                price = d;
+            }
+        }
+        order.setPrice(price);
+
         Trade trade = new Trade();
         trade.setTime(System.currentTimeMillis());
         trade.setBestMatch(true);
-        switch(order.getSide()){
-            case BUY:
-                double amount = order.getOrigQty();
-                double commission = amount *0.001;
-                trade.setBuyer(true);
-                trade.setCommission(amount*0.001);
-                trade.setCommissionAsset(baseCoin);
-                if(baseAsset.getFree()<(amount+commission)){
-                    throw new ApiException("Not enough balance on " + baseCoin + ", required: " + amount + ", available: " + baseAsset.getFree());
-                }
-                baseAsset.setFree(baseAsset.getFree()-amount);
-                baseAsset.setFree(baseAsset.getFree()-commission);
-                targetAsset.setFree(targetAsset.getFree()-amount * order.getPrice());
-                log.info("New free balance " + baseCoin + " " + baseAsset.getFree());
-                log.info("New free balance " + targetCoin + " " + targetAsset.getFree());
-                order.setExecutedQty(amount);
-                order.setStatus(OrderStatus.FILLED);
-                break;
-            case SELL:
-                amount = order.getOrigQty();
-                double targetAmount = amount * order.getPrice();
-                commission = targetAmount*0.001;
-                trade.setCommission(commission);
-                trade.setCommissionAsset(targetCoin);
-                trade.setBuyer(false);
-                trade.setCommissionAsset(targetCoin);
-                if(targetAsset.getFree()<(targetAmount+commission)){
-                    throw new ApiException("Not enough balance on " + baseCoin + ", required: " + amount + ", available: " + baseAsset.getFree());
-                }
-                targetAsset.setFree(targetAsset.getFree()-targetAmount);
-                targetAsset.setFree(targetAsset.getFree()-commission);
-                baseAsset.setFree(baseAsset.getFree()+amount);
-                log.info("New free balance " + baseCoin + " " + baseAsset.getFree());
-                log.info("New free balance " + targetCoin + " " + targetAsset.getFree());
-                order.setExecutedQty(amount);
-                order.setStatus(OrderStatus.FILLED);
-                break;
+
+        if(price==0.0){
+            log.warn("No price available for order of {}", symbol);
+            order.setExecutedQty(0.0);
+            trade.setBestMatch(false);
+            order.setStatus(OrderStatus.REJECTED);
+            trade.setCommission(0.0);
+        }else {
+            double quoteAmount = amount * price;
+            double commission = quoteAmount * 0.001;
+
+            order.setExecutedQty(amount);
+            order.setStatus(OrderStatus.FILLED);
+            trade.setCommission(commission);
+            trade.setCommissionAsset(targetCoin);
+
+            switch(order.getSide()){
+                case BUY:
+                    trade.setBuyer(true);
+                    if(targetAsset.getFree()<(quoteAmount+commission)){
+                        log.warn("Not enough balance on {} , required: {}, available: {}, correcting...", targetCoin, quoteAmount, targetAsset.getFree());
+                        quoteAmount = targetAsset.getFree() - commission;
+                        amount = targetAsset.getFree() / price;
+                    }
+                    targetAsset.setFree(targetAsset.getFree()-quoteAmount);
+                    targetAsset.setFree(targetAsset.getFree()-commission);
+                    baseAsset.setFree(baseAsset.getFree()+amount);
+                    break;
+                case SELL:
+                    trade.setBuyer(false);
+                    if(baseAsset.getFree()<amount){
+                        log.warn("Not enough balance on {} , required: {}, available: {}, correcting...", baseCoin, amount, baseAsset.getFree());
+                        amount = baseAsset.getFree();
+                        quoteAmount = baseAsset.getFree() * price;
+                    }
+                    targetAsset.setFree(targetAsset.getFree()+quoteAmount);
+                    targetAsset.setFree(targetAsset.getFree()-commission);
+                    baseAsset.setFree(baseAsset.getFree()-amount);
+                    break;
+            }
         }
-        trade.setQty(order.getExecutedQty());
+        trade.setQty(amount);
+        order.setExecutedQty(amount);
+        log.info("New free balance " + baseCoin + " " + baseAsset.getFree());
+        log.info("New free balance " + targetCoin + " " + targetAsset.getFree());
         return trade;
     }
 

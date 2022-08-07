@@ -51,7 +51,6 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -76,10 +75,12 @@ public class WebRequest {
     // Internal JSON parser
     private JsonParser jsonParser = new JsonParser();
     private String requestBody = "";
+    private long serverTimeOffset = 0L;
 
     // Creating public request
-    public WebRequest(String requestUrl) {
+    public WebRequest(long serverTimeOffset, String requestUrl) {
         this.requestUrl = requestUrl;
+        this.serverTimeOffset = serverTimeOffset;
     }
 
     // HMAC encoding
@@ -113,7 +114,7 @@ public class WebRequest {
                 }
             }
             list.add("recvWindow=" + 7000);
-            list.add("timestamp=" + String.valueOf(new Date().getTime()));
+            list.add("timestamp=" + String.valueOf(System.currentTimeMillis()-50+ serverTimeOffset));
             String queryToAdd = String.join("&", list);
             String query = "";
             log.debug("Signature: RequestUrl = {}", requestUrl);
