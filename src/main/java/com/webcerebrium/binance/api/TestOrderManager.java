@@ -74,6 +74,20 @@ public class TestOrderManager {
         return orders.stream().filter(o -> clientOrderId.equals(o.getClientOrderId())).findFirst().orElse(null);
     }
 
+    /**
+     * Calculates the DMI:
+     * <ol>
+     *     <li>Calculate +DM = the current high - previous high</li>
+     *     <li>Calculate -DM = the previous low - current low</li>
+     *     <li>Use +DM when the current high - previous high is greater than the previous low - current low. </li>
+     *     <li>Use -DM when the previous low - current low is greater than the current high - previous high.</li>
+     *     <li>The TR is the greater of the current high - current low, the current high - previous close, or the current low - previous close.</li>
+     *     <li>Smooth the 14-period averages of +DM, -DM, and the TR. </li>
+     * </ol>
+     * @param orderPlacement
+     * @return
+     * @throws ApiException
+     */
     public OrderRef createOrder(OrderPlacement orderPlacement) throws ApiException {
         Order order = createOrderInternal(orderPlacement, false);
         this.orders.add(order);

@@ -65,7 +65,7 @@ public final class Asset implements HasValue{
 
     @Override
     public double getValue() {
-        return free!=null?free:0.0;
+        return (free!=null?free:0.0) + (locked!=null?locked:0.0);
     }
 
     public void setPresentationRate(double presentationRate, String currency){
