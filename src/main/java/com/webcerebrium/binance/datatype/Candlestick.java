@@ -111,7 +111,7 @@ public class Candlestick implements Comparable<Candlestick>, HasSymbol, HasValue
     }
 
     public Double getMediumValue(){
-        return getFrameSize() / 2d;
+        return (getLow() + getHigh()) / 2d;
     }
 
     public Double getFrameSize(){
