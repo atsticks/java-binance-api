@@ -38,4 +38,15 @@ public enum OrderSide {
                 return 2;
         }
     }
+
+    public static OrderSide fromOpposite(OrderSide side){
+        switch(side){
+            case BUY:
+            default:
+               return OrderSide.SELL;
+            case SELL:
+                return OrderSide.BUY;
+        }
+    }
+
 }
