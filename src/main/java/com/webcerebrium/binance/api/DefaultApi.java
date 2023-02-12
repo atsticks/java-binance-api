@@ -1141,6 +1141,7 @@ public class DefaultApi implements Api {
                 order.setExecutedQty(orderRef.getPlacement().getQuantity());
                 order.setSide(orderRef.getPlacement().getSide());
                 order.setType(orderRef.getPlacement().getType());
+                order.setTrailingDelta(orderRef.getPlacement().getTrailingDelta());
             }else{
                 order.setTimeInForce(TimeInForce.GTC);
                 order.setType(OrderType.MARKET);
@@ -1251,9 +1252,9 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/order?symbol=" + Objects.requireNonNull(symbol) + "&orderId=" + orderId;
-            JsonObject ob = (new WebRequest(serverTimeOffset, u))
-                    .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).delete().read().asJsonObject();
-            return new Order(ob);
+            WebRequest res = (new WebRequest(serverTimeOffset, u))
+                    .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).delete().read();
+            return (new Gson()).fromJson(res.getRequestBody(), Order.class);
         }catch(InterruptedException e){
             throw new ApiException(e.toString());
         }finally{
@@ -1273,9 +1274,9 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/order?symbol=" + Objects.requireNonNull(symbol) + "&origClientOrderId=" + esc.escape(origClientOrderId);
-            JsonObject ob = (new WebRequest(serverTimeOffset, u))
-                    .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).delete().read().asJsonObject();
-            return new Order(ob);
+            WebRequest req = (new WebRequest(serverTimeOffset, u))
+                    .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).delete().read();
+            return (new Gson()).fromJson(req.getRequestBody(), Order.class);
         }catch(InterruptedException e){
             throw new ApiException(e.toString());
         }finally{
@@ -1296,9 +1297,9 @@ public class DefaultApi implements Api {
             maxConnections.acquire();
             limiter.acquire(2);
             String u = baseUrl + "v3/order?symbol=" + Objects.requireNonNull(symbol) + "&newClientOrderId=" + esc.escape(clientOrderId);
-            JsonObject ob = (new WebRequest(serverTimeOffset, u))
-                    .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).delete().read().asJsonObject();
-            return new Order(ob);
+            WebRequest req = (new WebRequest(serverTimeOffset, u))
+                    .connectionTimeoutSeconds(connectionTimeoutSeconds).sign(apiKey, secretKey, null).delete().read();
+            return (new Gson()).fromJson(req.getRequestBody(), Order.class);
         }catch(InterruptedException e){
             throw new ApiException(e.toString());
         }finally{

@@ -50,6 +50,7 @@ public class OrderPlacement implements HasSymbol{
     String newClientOrderId = "";
     Double stopPrice;
     Double icebergQty;
+    Long trailingDelta;
     Long recvWindow;
 
     private ThreadLocal<NumberFormat> qtyFormat = ThreadLocal.withInitial(() -> {
@@ -165,6 +166,9 @@ public class OrderPlacement implements HasSymbol{
         }
         if (icebergQty != null) {
             sb.append("&icebergQty=").append(formatQuantity(icebergQty));
+        }
+        if (trailingDelta != null) {
+            sb.append("&trailingDelta=").append(formatQuantity(trailingDelta));
         }
         if(recvWindow !=null){
             sb.append("&recvWindow=").append(recvWindow);

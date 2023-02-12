@@ -51,34 +51,37 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(of = {"symbol", "orderId", "time"})
 public class Order implements HasSymbol, HasValue{
-    public String symbol;
-    public Long orderId;
-    public String clientOrderId;
-    public Double price;
-    public Double origQty;
-    public Double executedQty;
-    public OrderStatus status;
-    public TimeInForce timeInForce;
-    public OrderType type;
-    public OrderSide side;
-    public Double stopPrice;
-    public Double icebergQty;
-    public Long time;
-    public boolean test;
+    String symbol;
+    Long orderId;
+    String clientOrderId;
+    Double price;
+    Double origQty;
+    Double executedQty;
+    OrderStatus status;
+    TimeInForce timeInForce;
+    OrderType type;
+    OrderSide side;
+    Double stopPrice;
+    long trailingDelta;
+    Double icebergQty;
+    Long time;
+    boolean test;
 
     public Order(){}
 
-    public Order(JsonObject ob){
-        symbol = ob.get("symbol").getAsString();
-        if(ob.get("origClientOrderId")!=null)
-            clientOrderId = ob.get("origClientOrderId").getAsString();
-        if(ob.get("clientOrderId")!=null)
-            clientOrderId = ob.get("clientOrderId").getAsString();
-        status = OrderStatus.valueOf(ob.get("status").getAsString());
-        timeInForce = TimeInForce.valueOf(ob.get("timeInForce").getAsString());
-        type = OrderType.valueOf(ob.get("type").getAsString());
-        side = OrderSide.valueOf(ob.get("side").getAsString());
-    }
+//    public Order(JsonObject ob){
+//        symbol = ob.get("symbol").getAsString();
+//        if(ob.get("origClientOrderId")!=null)
+//            clientOrderId = ob.get("origClientOrderId").getAsString();
+//        if(ob.get("trailingDelta")!=null)
+//            trailingDelta = ob.get("trailingDelta").getAsLong();
+//        if(ob.get("clientOrderId")!=null)
+//            clientOrderId = ob.get("clientOrderId").getAsString();
+//        status = OrderStatus.valueOf(ob.get("status").getAsString());
+//        timeInForce = TimeInForce.valueOf(ob.get("timeInForce").getAsString());
+//        type = OrderType.valueOf(ob.get("type").getAsString());
+//        side = OrderSide.valueOf(ob.get("side").getAsString());
+//    }
 
     @Override
     public double getValue() {
